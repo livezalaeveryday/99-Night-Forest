@@ -2,7 +2,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
  
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
-    Name = "🌀 สวัสดีคนดู อยากได้ไหม v1",
+    Name = "🌀 ไลฟ์สาระ ไปวันๆ v1",
     LoadingTitle = "ยินดีต้อนรับ Power Panel v1 สคริปต์ของไลฟ์สาระไปวันๆ",
     LoadingSubtitle = "กำลังโหลด...",
     ConfigurationSaving = {
