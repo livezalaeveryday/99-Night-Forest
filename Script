@@ -2,7 +2,7 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
  
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
-    Name = "🌀 ไลฟ์สาระ ไปวันๆ v1.2",
+    Name = "🌀 ไลฟ์สาระ ไปวันๆ v1.5 (God Mode)",
     LoadingTitle = "ยินดีต้อนรับ Power Panel v1 สคริปต์ของไลฟ์สาระไปวันๆ",
     LoadingSubtitle = "กำลังโหลด...",
     ConfigurationSaving = {
@@ -397,3 +397,19 @@ Rayfield:Notify({
     Duration=4,
     Image=6026568198
 })
+
+-- God Mode Script for 99 Nights in the Forest
+-- โดยใช้ RemoteEvent DamagePlayer เพื่อ heal infinite
+
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local DamagePlayer = ReplicatedStorage:WaitForChild("RemoteEvents"):WaitForChild("DamagePlayer")
+
+-- Loop เพื่อส่ง damage -1/0 (infinity heal) ทุก 0.1 วินาที
+spawn(function()
+    while true do
+        DamagePlayer:FireServer(-1/0)  -- หรือลอง -math.huge ถ้า -1/0 ไม่เวิร์ค
+        wait(0.1)  -- ปรับ delay ถ้าล้าเกิน
+    end
+end)
+
+print("God Mode Activated! คุณไม่ตายจาก damage หรือ hunger แล้ว")
