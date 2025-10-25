@@ -286,10 +286,10 @@ extraTab:CreateButton({
 })
  
 extraTab:CreateButton({
-    Name = "🌌 รัน Voidware Bug เยอะกิน Spec เครื่อง",
+    Name = "🌌 GOD MODE",
     Callback = function()
-        Rayfield:Notify({Title = "🌌 กำลังโหลด Voidware...", Content = "กรุณารอสักครู่", Duration = 3, Image = 6026568198})
-        loadstring(game:HttpGet("https://rawscripts.net/raw/99-Nights-in-the-Forest-KEYLESS-Best-Script-for-99-Nights-in-the-Forest-53093"))()
+        Rayfield:Notify({Title = "🌌 กำลังเปิด GOD MODE", Content = "กรุณารอสักครู่", Duration = 3, Image = 6026568198})
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()
     end
 })
  
