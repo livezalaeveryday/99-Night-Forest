@@ -104,7 +104,7 @@ local flyToggle = MainTab:CreateToggle({
  
 local flySlider = MainTab:CreateSlider({
     Name="🚀 ความเร็วบิน",
-    Range={1,500},
+    Range={1,1000},
     Increment=1,
     Suffix=" Speed",
     CurrentValue=50,
@@ -129,7 +129,7 @@ local speedToggle = MainTab:CreateToggle({
  
 local speedSlider = MainTab:CreateSlider({
     Name="⚡ ความเร็ววิ่ง",
-    Range={1,500},
+    Range={1,1000},
     Increment=1,
     Suffix=" Speed",
     CurrentValue=32,
@@ -173,6 +173,14 @@ local infJumpToggle = MainTab:CreateToggle({
             Duration=3,
             Image=6026568198
         })
+    end
+})
+
+MainTab:CreateButton({
+    Name = "🌌 GOD MODE",
+    Callback = function()
+        Rayfield:Notify({Title = "🌌 กำลังเปิด GOD MODE", Content = "กรุณารอสักครู่", Duration = 3, Image = 6026568198})
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()
     end
 })
  
