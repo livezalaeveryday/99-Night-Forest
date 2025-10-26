@@ -1,5 +1,5 @@
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
- 
+
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
     Name = "🌀 ไลฟ์สาระ ไปวันๆ v1.5 (God Mode)",
@@ -9,7 +9,38 @@ local Window = Rayfield:CreateWindow({
         Enabled = true,
         FolderName = "LifeSuraConfig",
         FileName = "SuraConfig"
-    },
+    }
+})
+
+-- === ตัวหนังสือวิ่ง (Marquee Text) ===
+local marqueeText = "🌀 ไลฟ์สาระ ไปวันๆ v1.5 (God Mode)"
+local displayText = marqueeText
+local direction = 1 -- 1 = ขวาไปซ้าย, -1 = ซ้ายไปขวา
+local speed = 0.3 -- ความเร็ว (วินาทีต่อการเลื่อน 1 ตัว)
+local padding = 3 -- จำนวนช่องว่างระหว่างรอบ
+
+task.spawn(function()
+    while task.wait(speed) do
+        -- เลื่อนตัวอักษร
+        if direction == 1 then
+            displayText = displayText:sub(2) .. displayText:sub(1, 1)
+        else
+            displayText = displayText:sub(-1) .. displayText:sub(1, -2)
+        end
+
+        -- ตรวจสอบว่าถึงจุดกลับทางหรือยัง
+        local padded = string.rep(" ", padding)
+        local fullCycle = marqueeText .. padded
+        if displayText == fullCycle:sub(#displayText - #marqueeText + 1, #displayText - #marqueeText + #fullCycle) then
+            direction = -direction -- เปลี่ยนทิศ
+        end
+
+        -- อัปเดตชื่อหน้าต่าง
+        Window:Update({
+            Name = displayText
+        })
+    end
+end)
     Discord = {
         Enabled = false,
         Invite = "dSyCsRpU62",
