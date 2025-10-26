@@ -175,14 +175,6 @@ local infJumpToggle = MainTab:CreateToggle({
         })
     end
 })
-
-MainTab:CreateButton({
-    Name = "🌌 GOD MODE",
-    Callback = function()
-        Rayfield:Notify({Title = "🌌 กำลังเปิด GOD MODE", Content = "กรุณารอสักครู่", Duration = 3, Image = 6026568198})
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()
-    end
-})
  
 -- แท็บเพื่อน
 local friendTab = Window:CreateTab("👥 วาป", 6026568198)
