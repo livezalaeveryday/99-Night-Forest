@@ -2,21 +2,52 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
  
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
-    Name = "🌀 ไลฟ์สาระ ไปวันๆ v1.5 (God Mode)",
-    LoadingTitle = "ยินดีต้อนรับ Power Panel v1 สคริปต์ของไลฟ์สาระไปวันๆ",
-    LoadingSubtitle = "กำลังโหลด...",
-    ConfigurationSaving = {
-        Enabled = true,
-        FolderName = "LifeSuraConfig",
-        FileName = "SuraConfig"
-    },
-    Discord = {
-        Enabled = false,
-        Invite = "dSyCsRpU62",
-        RememberJoins = true
-    },
-    KeySystem = false
+   Name = "🌀 ไลฟ์สาระ ไปวันๆ v1.5 (God Mode)", -- ชื่อของหน้าต่าง UI
+   Icon = 0, -- ไอคอนที่มุมบนของ UI (ใช้ Lucide Icons แบบ string หรือ Roblox Image แบบ number). 0 = ไม่มีไอคอน
+   LoadingTitle = "ยินดีต้อนรับ Power Panel v1 สคริปต์ของไลฟ์สาระไปวันๆ", -- ชื่อที่แสดงขณะโหลด UI
+   LoadingSubtitle = "power panel team", -- คำบรรยายสั้นตอนโหลด
+   ShowText = "Rayfield", -- สำหรับมือถือ ใช้เพื่อแสดง/ซ่อน UI
+   Theme = "Bloom", -- ธีมของ UI (ดูธีมอื่นได้ที่ docs.sirius.menu)
+
+   ToggleUIKeybind = "K", -- ปุ่มกดเพื่อซ่อน/แสดง UI (ตัวอย่าง "K" หรือ Enum.KeyCode)
+
+   DisableRayfieldPrompts = true, -- ปิดการแจ้งเตือนของ Rayfield หรือไม่
+   DisableBuildWarnings = true, -- ป้องกันการแจ้งเตือนเมื่อเวอร์ชันของสคริปต์ไม่ตรงกับ UI
+
+   ConfigurationSaving = {
+      Enabled = true, -- เปิดการบันทึกการตั้งค่า
+      FolderName = nil, -- ถ้าอยากเก็บในโฟลเดอร์เฉพาะ
+      FileName = "Big Hub" -- ชื่อไฟล์ที่บันทึกการตั้งค่า
+   },
+
+   Discord = {
+      Enabled = false, -- เปิดให้ผู้ใช้เข้าร่วม Discord ของคุณถ้า executor รองรับ
+      Invite = "noinvitelink", -- โค้ดเชิญ Discord (ไม่ต้องมี discord.gg/)
+      RememberJoins = true -- ถ้า true จะจำผู้ใช้ที่เคยเข้าร่วมแล้ว
+   },
+
+   KeySystem = false, -- ใช้ระบบ Key หรือไม่
+   KeySettings = {
+      Title = "ระบบคีย์", -- ชื่อหน้าต่าง Key System
+      Subtitle = "ไปหาซื้อคีย์มาใส่", -- คำบรรยายสั้น
+      Note = "No method of obtaining the key is provided", -- ข้อความบอกวิธีรับ Key
+      FileName = "Key", -- ชื่อไฟล์ที่บันทึก Key
+      SaveKey = true, -- บันทึก Key ของผู้ใช้หรือไม่
+      GrabKeyFromSite = false, -- ดึง Key จากเว็บไซต์หรือไม่
+      Key = {"Hello"} -- รายชื่อ Key ที่สามารถใช้ได้ (อาจเป็น string หรือ RAW file เช่น Pastebin)
+   }
 })
+
+local MobileButton = Instance.new("TextButton")
+MobileButton.Size = UDim2.new(0,100,0,50)
+MobileButton.Position = UDim2.new(0,10,0,10)
+MobileButton.Text = "Rayfield"
+MobileButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
+
+MobileButton.MouseButton1Click:Connect(function()
+    Window:Toggle()
+end)
+
  
 -- แท็บตัวละคร
 local MainTab = Window:CreateTab("ตัวละคร", 6026568198)
