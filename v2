@@ -7,7 +7,7 @@ local Window = Rayfield:CreateWindow({
    LoadingTitle = "ยินดีต้อนรับ Power Panel v1 สคริปต์ของไลฟ์สาระไปวันๆ",
    LoadingSubtitle = "power panel team",
    ShowText = "Rayfield",
-   Theme = "Amethyst",
+   Theme = "Bloom",
    ToggleUIKeybind = "K",
    DisableRayfieldPrompts = true,
    DisableBuildWarnings = true,
@@ -33,33 +33,26 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
--- === ปุ่มมือถือ แยก ScreenGui (ปลอดภัยกว่า) ===
-local player = game.Players.LocalPlayer
-local screenGui = Instance.new("ScreenGui")
-screenGui.Name = "RayfieldToggleGui"
-screenGui.ResetOnSpawn = false
-screenGui.Parent = player:WaitForChild("PlayerGui")
-
+-- ปุ่มมือถือ
 local MobileButton = Instance.new("TextButton")
-MobileButton.Size = UDim2.new(0, 100, 0, 50)
-MobileButton.Position = UDim2.new(0, 10, 0, 10)
+MobileButton.Size = UDim2.new(0,100,0,50)
+MobileButton.Position = UDim2.new(0,10,0,10)
 MobileButton.Text = "Rayfield"
-MobileButton.BackgroundColor3 = Color3.fromRGB(100, 50, 200)
-MobileButton.TextColor3 = Color3.new(1,1,1)
-MobileButton.Font = Enum.Font.GothamBold
-MobileButton.TextScaled = true
-MobileButton.Parent = screenGui
-
+MobileButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
 MobileButton.MouseButton1Click:Connect(function()
     Window:Toggle()
 end)
 
--- === ตัวแปรระบบ ===
+-- ตัวแปรระบบ
 local Players = game:GetService("Players")
 local RS = game:GetService("RunService")
 local UIS = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local player = Players.LocalPlayer
-local char, hrp, humanoid
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local humanoid = char:WaitForChild("Humanoid")
 
 -- ตัวแปรฟังก์ชัน
 local flying = false
@@ -70,191 +63,98 @@ local runSpeed = 32
 local noclipEnabled = false
 local infJumpEnabled = false
 
--- === ฟังก์ชันอัปเดตตัวละคร ===
-local function updateCharacterReferences()
-    char = player.Character
-    if not char then return end
-    hrp = char:FindFirstChild("HumanoidRootPart")
-    humanoid = char:FindFirstChild("Humanoid")
-end
-
--- === ตั้งค่าตัวละครครั้งแรก ===
-player.CharacterAdded:Connect(function(c)
-    char = c
-    updateCharacterReferences()
-    
-    -- รอโหลดให้แน่นอน
-    task.delay(0.1, function()
-        if c:FindFirstChild("HumanoidRootPart") and c:FindFirstChild("Humanoid") then
-            updateCharacterReferences()
-        end
-    end)
-
-    -- รีเซ็ตสถานะ
-    stopFlying()
-    toggleSpeed(false)
-    noclipEnabled = false
-    infJumpEnabled = false
-    Rayfield:LoadConfiguration()
-end)
-
-player.CharacterRemoving:Connect(function()
-    stopFlying()
-end)
-
--- เรียกครั้งแรก
-updateCharacterReferences()
-
 -- === ฟังก์ชันบิน ===
 local function startFlying()
-    if flying or not hrp or not humanoid then return end
+    if flying then return end
     flying = true
     humanoid.PlatformStand = true
-
     vv = Instance.new("BodyVelocity")
-    vv.MaxForce = Vector3.new(1e5, 1e5, 1e5)
+    vv.MaxForce = Vector3.new(1e5,1e5,1e5)
     vv.P = 1250
     vv.Velocity = Vector3.zero
     vv.Parent = hrp
-
     gyro = Instance.new("BodyGyro")
-    gyro.MaxTorque = Vector3.new(4e5, 4e5, 4e5)
+    gyro.MaxTorque = Vector3.new(4e5,4e5,4e5)
     gyro.P = 3000
     gyro.CFrame = hrp.CFrame
     gyro.Parent = hrp
-
-    Rayfield:Notify({
-        Title = "โหมดบินเปิด!",
-        Content = "ใช้ W,A,S,D,Space,Ctrl เพื่อควบคุม",
-        Duration = 3,
-        Image = 6026568198
-    })
+    Rayfield:Notify({Title = "โหมดบินเปิด!", Content = "ใช้ W,A,S,D,Space,Ctrl เพื่อควบคุม", Duration = 3, Image = 6026568198})
 end
 
 local function stopFlying()
     if not flying then return end
     flying = false
-    if vv and vv.Parent then vv:Destroy() end
-    if gyro and gyro.Parent then gyro:Destroy() end
-    vv, gyro = nil, nil
-    if humanoid then humanoid.PlatformStand = false end
-
-    Rayfield:Notify({
-        Title = "โหมดบินปิด",
-        Content = "ลงจอดเรียบร้อย",
-        Duration = 3,
-        Image = 6026568198
-    })
+    if vv then vv:Destroy() vv=nil end
+    if gyro then gyro:Destroy() gyro=nil end
+    humanoid.PlatformStand = false
+    Rayfield:Notify({Title = "โหมดบินปิด", Content = "ลงจอดเรียบร้อย", Duration = 3, Image = 6026568198})
 end
 
--- === ฟังก์ชันวิ่งเร็ว ===
+-- ฟังก์ชันวิ่งเร็ว
 local function toggleSpeed(on)
     superSpeed = on
-    if humanoid then
-        humanoid.WalkSpeed = superSpeed and runSpeed or 16
-    end
-    Rayfield:Notify({
-        Title = superSpeed and "วิ่งเร็วเปิด" or "วิ่งเร็วปิด",
-        Content = superSpeed and "วิ่งเร็วสุดขีด!" or "กลับสู่ความเร็วปกติ",
-        Duration = 3,
-        Image = 6023426921
-    })
+    humanoid.WalkSpeed = superSpeed and runSpeed or 16
+    Rayfield:Notify({Title = superSpeed and "วิ่งเร็วเปิด" or "วิ่งเร็วปิด", Content = superSpeed and "วิ่งเร็วสุดขีด!" or "กลับสู่ความเร็วปกติ", Duration = 3, Image = 6023426921})
 end
 
 -- === แท็บตัวละคร ===
 local MainTab = Window:CreateTab("ตัวละคร", 6026568198)
 
-local flyToggle = MainTab:CreateToggle({
-    Name = "เปิด/ปิด การบิน",
+local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
+local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,1000}, Increment=1, Suffix=" Speed", CurrentValue=50, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
+local speedToggle = MainTab:CreateToggle({Name="เปิด/ปิด วิ่งเร็ว", CurrentValue=false, Flag="SpeedToggle", Callback=toggleSpeed})
+local speedSlider = MainTab:CreateSlider({Name="ความเร็ววิ่ง", Range={1,1000}, Increment=1, Suffix=" Speed", CurrentValue=32, Flag="RunSpeed", Callback=function(val) runSpeed=val if superSpeed then humanoid.WalkSpeed=runSpeed end end})
+local noclipToggle = MainTab:CreateToggle({Name="เปิด/ปิด Noclip", CurrentValue=false, Flag="NoclipToggle", Callback=function(val) noclipEnabled=val end})
+local infJumpToggle = MainTab:CreateToggle({Name="เปิด/ปิด Infinite Jump", CurrentValue=false, Flag="InfJumpToggle", Callback=function(val) infJumpEnabled=val end})
+
+-- === ลบหมอกถาวร ===
+local OriginalFogEnd = game:GetService("Lighting").FogEnd
+local OriginalFogStart = game:GetService("Lighting").FogStart
+local FogLoopConnection = nil
+
+local ToggleFog = MainTab:CreateToggle({
+    Name = "ลบหมอก (ถาวร)",
     CurrentValue = false,
-    Flag = "FlyToggle",
+    Flag = "ToggleFog",
     Callback = function(val)
-        if val then startFlying() else stopFlying() end
+        local Lighting = game:GetService("Lighting")
+        if val then
+            if OriginalFogEnd == nil then OriginalFogEnd = Lighting.FogEnd end
+            if OriginalFogStart == nil then OriginalFogStart = Lighting.FogStart end
+            if FogLoopConnection then FogLoopConnection:Disconnect() end
+            FogLoopConnection = RS.Heartbeat:Connect(function()
+                if not ToggleFog.CurrentValue then return end
+                Lighting.FogEnd = 1000
+                Lighting.FogStart = 1000
+            end)
+            Lighting.FogEnd = 1000
+            Lighting.FogStart = 1000
+            Rayfield:Notify({Title = "ลบหมอก", Content = "หมอกหายถาวร!", Duration = 3})
+        else
+            if FogLoopConnection then FogLoopConnection:Disconnect() FogLoopConnection = nil end
+            Lighting.FogEnd = OriginalFogEnd or 100000
+            Lighting.FogStart = OriginalFogStart or 0
+            Rayfield:Notify({Title = "ลบหมอก", Content = "หมอกกลับมาแล้ว", Duration = 3})
+        end
     end
 })
 
-local flySlider = MainTab:CreateSlider({
-    Name = "ความเร็วบิน",
-    Range = {1, 1000},
-    Increment = 1,
-    Suffix = " Speed",
-    CurrentValue = 50,
-    Flag = "FlySpeed",
-    Callback = function(val)
-        flySpeed = val
-        Rayfield:Notify({
-            Title = "ปรับความเร็วบิน",
-            Content = "ตั้งความเร็วบินเป็น " .. val,
-            Duration = 2,
-            Image = 6026568198
-        })
+-- รองรับ Load Config
+task.spawn(function()
+    task.wait(1)
+    if ToggleFog.CurrentValue then
+        ToggleFog.Callback(true)
     end
-})
+end)
 
-local speedToggle = MainTab:CreateToggle({
-    Name = "เปิด/ปิด วิ่งเร็ว",
-    CurrentValue = false,
-    Flag = "SpeedToggle",
-    Callback = toggleSpeed
-})
-
-local speedSlider = MainTab:CreateSlider({
-    Name = "ความเร็ววิ่ง",
-    Range = {1, 1000},
-    Increment = 1,
-    Suffix = " Speed",
-    CurrentValue = 32,
-    Flag = "RunSpeed",
-    Callback = function(val)
-        runSpeed = val
-        if superSpeed and humanoid then humanoid.WalkSpeed = runSpeed end
-        Rayfield:Notify({
-            Title = "ปรับความเร็ววิ่ง",
-            Content = "ตั้งความเร็ววิ่งเป็น " .. val,
-            Duration = 2,
-            Image = 6023426921
-        })
-    end
-})
-
-local noclipToggle = MainTab:CreateToggle({
-    Name = "เปิด/ปิด Noclip",
-    CurrentValue = false,
-    Flag = "NoclipToggle",
-    Callback = function(val)
-        noclipEnabled = val
-        Rayfield:Notify({
-            Title = val and "Noclip เปิด" or "Noclip ปิด",
-            Content = val and "เดินทะลุวัตถุได้!" or "กลับปกติ",
-            Duration = 3,
-            Image = 6026568198
-        })
-    end
-})
-
-local infJumpToggle = MainTab:CreateToggle({
-    Name = "เปิด/ปิด Infinite Jump",
-    CurrentValue = false,
-    Flag = "InfJumpToggle",
-    Callback = function(val)
-        infJumpEnabled = val
-        Rayfield:Notify({
-            Title = val and "Infinite Jump เปิด" or "Infinite Jump ปิด",
-            Content = val and "กระโดดไม่จำกัด!" or "กลับสู่ปกติ",
-            Duration = 3,
-            Image = 6026568198
-        })
-    end
-})
-
--- === แท็บวาป ===
+-- === แท็บวาป + ลากศพ ===
 local friendTab = Window:CreateTab("วาป", 6026568198)
 
 local function getPlayerList()
     local list = {}
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= player then
-            table.insert(list, p.DisplayName .. " (" .. p.Name .. ")")
+            table.insert(list, p.DisplayName.." ("..p.Name..")")
         end
     end
     return list
@@ -263,60 +163,110 @@ end
 local friendDropdown = friendTab:CreateDropdown({
     Name = "เลือกเพื่อน",
     Options = getPlayerList(),
-    CurrentOption = {""},
+    CurrentOption = {},
     Flag = "FriendSelect"
 })
 
+-- ปุ่มวาปไปหาเพื่อน
 friendTab:CreateButton({
     Name = "วาปไปหาเพื่อน",
     Callback = function()
         local selected = friendDropdown.CurrentOption[1]
         if not selected or selected == "" then
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "กรุณาเลือกเพื่อนก่อน!",
-                Duration = 3,
-                Image = 6026568198
-            })
+            Rayfield:Notify({Title = "Error", Content = "กรุณาเลือกเพื่อนก่อน!", Duration = 3})
             return
         end
-
         local friendName = selected:match("%((.-)%)") or selected
-        updateCharacterReferences()
+        char = player.Character or player.CharacterAdded:Wait()
+        hrp = char:WaitForChild("HumanoidRootPart")
+        local targetPlayer = Players:FindFirstChild(friendName)
+        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+            hrp.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+            Rayfield:Notify({Title = "Teleport สำเร็จ", Content = "ไปหา "..friendName, Duration = 3})
+        else
+            Rayfield:Notify({Title = "ไม่พบเป้าหมาย", Content = "เพื่อนไม่ออนไลน์", Duration = 3})
+        end
+    end
+})
 
-        if not hrp or not hrp.Parent then
-            Rayfield:Notify({
-                Title = "Error",
-                Content = "ตัวละครยังไม่โหลด!",
-                Duration = 3,
-                Image = 6026568198
-            })
+-- === ลากศพเฉพาะชื่อ ===
+local DragOffset = 5
+local DragDelay = 0.2
+
+friendTab:CreateSlider({
+    Name = "ระยะห่างลากศพ (studs)",
+    Range = {1, 15},
+    Increment = 1,
+    CurrentValue = 5,
+    Flag = "DragOffset",
+    Callback = function(val) DragOffset = val end
+})
+
+friendTab:CreateSlider({
+    Name = "ดีเลย์ลาก (วินาที)",
+    Range = {0.05, 1},
+    Increment = 0.05,
+    CurrentValue = 0.2,
+    Flag = "DragDelay",
+    Callback = function(val) DragDelay = val end
+})
+
+friendTab:CreateButton({
+    Name = "ลากศพตามชื่อ",
+    Callback = function()
+        local selected = friendDropdown.CurrentOption[1]
+        if not selected then
+            Rayfield:Notify({Title = "ผิดพลาด", Content = "กรุณาเลือกชื่อก่อน!", Duration = 3})
+            return
+        end
+        local displayName = selected:match("^(.+) %(") or selected
+
+        char = player.Character or player.CharacterAdded:Wait()
+        hrp = char:WaitForChild("HumanoidRootPart")
+
+        local itemsFolder = Workspace:WaitForChild("Characters", 10)
+        local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents", 10)
+        if not itemsFolder or not remoteEvents then
+            Rayfield:Notify({Title = "ผิดพลาด", Content = "ไม่พบ Characters หรือ RemoteEvents", Duration = 5})
             return
         end
 
-        local targetPlayer = Players:FindFirstChild(friendName)
-        local targetCFrame = nil
-
-        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            targetCFrame = targetPlayer.Character.HumanoidRootPart.CFrame
+        local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem", 5)
+        local stopDragging = remoteEvents:WaitForChild("StopDraggingItem", 5)
+        if not startDragging or not stopDragging then
+            Rayfield:Notify({Title = "ผิดพลาด", Content = "ไม่พบ RemoteEvent ลากศพ", Duration = 5})
+            return
         end
 
-        if targetCFrame then
-            hrp.CFrame = targetCFrame + Vector3.new(0, 3, 0)
-            Rayfield:Notify({
-                Title = "Teleport สำเร็จ",
-                Content = "คุณได้ไปหา " .. friendName,
-                Duration = 3,
-                Image = 6026568198
-            })
-        else
-            Rayfield:Notify({
-                Title = "ไม่พบเป้าหมาย",
-                Content = "เพื่อนไม่ออนไลน์",
-                Duration = 3,
-                Image = 6026568198
-            })
+        local targetName = displayName .. " Body"
+        local bodies = {}
+        for _, obj in pairs(itemsFolder:GetChildren()) do
+            if obj.Name == targetName then
+                table.insert(bodies, obj)
+            end
         end
+
+        if #bodies == 0 then
+            Rayfield:Notify({Title = "ไม่พบศพ", Content = "ไม่มีศพชื่อ \""..targetName.."\"", Duration = 4})
+            return
+        end
+
+        Rayfield:Notify({Title = "กำลังลากศพ", Content = "พบ "..#bodies.." ตัว", Duration = 3})
+
+        task.spawn(function()
+            for i, body in ipairs(bodies) do
+                local clone = cloneref and cloneref(body) or body
+                startDragging:FireServer(clone)
+                task.wait(0.02)
+                if body.PrimaryPart then
+                    body:PivotTo(hrp.CFrame * CFrame.new(0, 0, -DragOffset))
+                end
+                task.wait(0.05)
+                stopDragging:FireServer(clone)
+                task.wait(DragDelay)
+            end
+            Rayfield:Notify({Title = "สำเร็จ!", Content = "ลากศพทั้งหมด "..#bodies.." ตัว!", Duration = 4})
+        end)
     end
 })
 
@@ -324,130 +274,76 @@ friendTab:CreateButton({
     Name = "รีเฟรชรายชื่อ",
     Callback = function()
         friendDropdown:Set(getPlayerList())
-        Rayfield:Notify({
-            Title = "รายชื่ออัปเดตแล้ว",
-            Content = "โหลดรายชื่อผู้เล่นใหม่สำเร็จ!",
-            Duration = 3,
-            Image = 6026568198
-        })
+        Rayfield:Notify({Title = "อัปเดตแล้ว", Content = "รีเฟรชรายชื่อสำเร็จ", Duration = 3})
     end
 })
 
--- อัปเดต Dropdown อัตโนมัติ
-Players.PlayerAdded:Connect(function()
-    friendDropdown:Set(getPlayerList())
-end)
-
-Players.PlayerRemoving:Connect(function()
-    friendDropdown:Set(getPlayerList())
-end)
+-- อัปเดต Dropdown
+Players.PlayerAdded:Connect(function() friendDropdown:Set(getPlayerList()) end)
+Players.PlayerRemoving:Connect(function() friendDropdown:Set(getPlayerList()) end)
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("99คืนในป่าค่ายอื่น", 6031280882)
+extraTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
+extraTab:CreateButton({Name = "รัน SomTank", Callback = function() loadstring(game:HttpGet('https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v3'))() end})
+extraTab:CreateButton({Name = "รัน Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 
-extraTab:CreateButton({
-    Name = "GOD MODE",
-    Callback = function()
-        Rayfield:Notify({Title = "กำลังเปิด GOD MODE", Content = "กรุณารอสักครู่", Duration = 3, Image = 6026568198})
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()
-    end
-})
-
-extraTab:CreateButton({
-    Name = "รัน SomTank",
-    Callback = function()
-        Rayfield:Notify({Title = "กำลังโหลด SomTank...", Content = "กรุณารอสักครู่", Duration = 3, Image = 6026568198})
-        loadstring(game:HttpGet('https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v3'))()
-    end
-})
-
-extraTab:CreateButton({
-    Name = "รัน Foxname Hub",
-    Callback = function()
-        Rayfield:Notify({Title = "กำลังโหลด Foxname...", Content = "กรุณารอสักครู่", Duration = 3, Image = 6026568198})
-        loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))()
-    end
-})
-
--- === แท็บอัพเดต ===
+-- === แท็บอัพเดต & เครดิต ===
 local updateTab = Window:CreateTab("รายการอัพเดต", 6034989579)
-updateTab:CreateLabel("version 1.3.3 (+)แท็บรายการอัพเดต แท็บสคริปต์เพิ่มเติม แท็บวาป แก้ไขให้วาปใช้ได้กับ displayname")
-updateTab:CreateLabel("version 1.3.4 ไม่ประสงค์บอกอัพเดต")
-updateTab:CreateLabel("version 1.3.5 (=)เปลี่ยนวาปให้เป็นไม่ต้องพิมพ์แค่เลือกแล้วกดก็สามารถเลือกวาปได้ by thomas")
-updateTab:CreateLabel("version 1.3.6 แก้บั๊ก Respawn, Noclip, Fly ค้าง")
+updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
+updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
+updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
 
--- === แท็บเครดิต ===
 local creditTab2 = Window:CreateTab("เครดิต", 6034989579)
-creditTab2:CreateLabel("เครดิต")
 creditTab2:CreateLabel("owner by livezala")
 creditTab2:CreateLabel("original script by dion_ktl")
-creditTab2:CreateLabel("นำมาต่อยอด by thomas (โทมัส)")
-creditTab2:CreateLabel("อัพเดต 10/11/2025 10:54 PM")
-creditTab2:CreateLabel("version 1.3.6 (แก้บั๊กเต็มรูปแบบ)")
-creditTab2:CreateLabel("รับอัพเดต discord: dSyCsRpU62")
+creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมัส)")
+creditTab2:CreateLabel("อัพเดต 31/10/2025")
+creditTab2:CreateLabel("Discord: dSyCsRpU62")
 
 -- === เคาท์ดาวน์ปีใหม่ ===
 local newYearTab = Window:CreateTab("เคาท์ดาวน์ปีใหม่", 6034979821)
 local countdownLabel = newYearTab:CreateLabel("กำลังโหลดเคาท์ดาวน์...")
-local targetTime = os.time({year = 2026, month = 1, day = 1, hour = 0, min = 0, sec = 0})
-
-local countdownConnection
-countdownConnection = RS.RenderStepped:Connect(function()
-    local now = os.time()
-    local diff = targetTime - now
-
+local targetTime = os.time({year=2026, month=1, day=1, hour=0, min=0, sec=0})
+local countdownConnection = RS.RenderStepped:Connect(function()
+    local diff = targetTime - os.time()
     if diff <= 0 then
         countdownLabel:Set("Happy New Year!")
         countdownConnection:Disconnect()
         return
     end
-
-    local days = math.floor(diff / 86400)
-    local hours = math.floor((diff % 86400) / 3600)
-    local minutes = math.floor((diff % 3600) / 60)
-    local seconds = diff % 60
-
-    countdownLabel:Set(string.format("%02d:%02d:%02d:%02d", days, hours, minutes, seconds))
+    local d = math.floor(diff / 86400)
+    local h = math.floor((diff % 86400) / 3600)
+    local m = math.floor((diff % 3600) / 60)
+    local s = diff % 60
+    countdownLabel:Set(string.format("%02d:%02d:%02d:%02d", d, h, m, s))
 end)
 
 -- === ลูปหลัก ===
 RS.RenderStepped:Connect(function()
-    if flying and vv and vv.Parent and gyro and gyro.Parent and hrp and humanoid then
+    if flying and vv and gyro and hrp and humanoid then
         local cam = workspace.CurrentCamera
         if not cam then return end
-
-        local flatForward = Vector3.new(cam.CFrame.LookVector.X, 0, cam.CFrame.LookVector.Z)
-        local forward = flatForward.Magnitude > 0 and flatForward.Unit or Vector3.zero
-        local right = Vector3.new(cam.CFrame.RightVector.X, 0, cam.CFrame.RightVector.Z)
-        if right.Magnitude > 0 then right = right.Unit end
-
+        local forward = Vector3.new(cam.CFrame.LookVector.X, 0, cam.CFrame.LookVector.Z).Unit
+        local right = Vector3.new(cam.CFrame.RightVector.X, 0, cam.CFrame.RightVector.Z).Unit
         local moveVec = Vector3.zero
-        if UIS:IsKeyDown(Enum.KeyCode.W) then moveVec += Vector3.new(0, 0, 1) end
-        if UIS:IsKeyDown(Enum.KeyCode.S) then moveVec += Vector3.new(0, 0, -1) end
-        if UIS:IsKeyDown(Enum.KeyCode.A) then moveVec += Vector3.new(-1, 0, 0) end
-        if UIS:IsKeyDown(Enum.KeyCode.D) then moveVec += Vector3.new(1, 0, 0) end
-        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveVec += Vector3.new(0, 1, 0) end
-        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then moveVec += Vector3.new(0, -1, 0) end
-
-        local desired = forward * moveVec.Z + right * moveVec.X + Vector3.new(0, moveVec.Y, 0)
-        if desired.Magnitude > 0 then desired = desired.Unit * flySpeed end
-        vv.Velocity = desired
-
-        if desired.Magnitude > 1 then
-            local flatDir = Vector3.new(desired.X, 0, desired.Z)
-            if flatDir.Magnitude > 0 then
-                gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + flatDir)
-            end
+        if UIS:IsKeyDown(Enum.KeyCode.W) then moveVec += forward end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then moveVec -= forward end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then moveVec -= right end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then moveVec += right end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then moveVec += Vector3.new(0,1,0) end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftControl) then moveVec += Vector3.new(0,-1,0) end
+        if moveVec.Magnitude > 0 then vv.Velocity = moveVec.Unit * flySpeed else vv.Velocity = Vector3.zero end
+        if moveVec.X ~= 0 or moveVec.Z ~= 0 then
+            gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(moveVec.X, 0, moveVec.Z))
         end
     end
 end)
 
 RS.Stepped:Connect(function()
     if noclipEnabled and char then
-        for _, part in pairs(char:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = false
-            end
+        for _,part in pairs(char:GetDescendants()) do
+            if part:IsA("BasePart") then part.CanCollide = false end
         end
     end
 end)
@@ -458,10 +354,16 @@ UIS.JumpRequest:Connect(function()
     end
 end)
 
--- === แจ้งเตือนโหลดสำเร็จ ===
-Rayfield:Notify({
-    Title = "โปรโหลดสำเร็จ!",
-    Content = "พร้อมผจญภัยกับ ไลฟ์สาระ ไปวันๆ แล้ว!",
-    Duration = 4,
-    Image = 6026568198
-})
+-- รีเซ็ตเมื่อ respawn
+player.CharacterAdded:Connect(function(c)
+    char = c
+    hrp = c:WaitForChild("HumanoidRootPart")
+    humanoid = c:WaitForChild("Humanoid")
+    stopFlying()
+    toggleSpeed(false)
+    noclipEnabled = false
+    infJumpEnabled = false
+    Rayfield:LoadConfiguration()
+end)
+
+Rayfield:Notify({Title="โหลดสำเร็จ!", Content="พร้อมลุย ไลฟ์สาระ ไปวันๆ!", Duration=4, Image=6026568198})
