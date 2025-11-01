@@ -283,7 +283,7 @@ Players.PlayerAdded:Connect(function() friendDropdown:Set(getPlayerList()) end)
 Players.PlayerRemoving:Connect(function() friendDropdown:Set(getPlayerList()) end)
 
 -- === แท็บสคริปต์เพิ่มเติม ===
-local extraTab = Window:CreateTab("99คืนในป่าค่ายอื่น", 6031280882)
+local extraTab = Window:CreateTab("God Mode+ดึงของ", 6031280882)
 extraTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
 extraTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
 extraTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
