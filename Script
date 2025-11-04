@@ -288,7 +288,7 @@ extraTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:
 extraTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
 extraTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
 extraTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
-extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet('https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v3'))() end})
+extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 
 -- === แท็บอัพเดต & เครดิต ===
