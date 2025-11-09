@@ -295,42 +295,6 @@ creditTab2:CreateLabel("Discord: dSyCsRpU62")
 -- === แท็บใหม่: วาปสถานที่ (1 ปุ่ม 1 ที่) ===
 local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
 
--- ตารางพิกัด (แก้ไข/เพิ่มได้เลยตรงนี้)
-local Locations = {
-    Terrain     = CFrame.new(0, 50, 0),        -- แก้พิกัด Terrain ตรงนี้
-    Spawn       = CFrame.new(0, 10, 0),
-    SafeZone    = CFrame.new(150, 15, 150),
-    Forest      = CFrame.new(-300, 20, -250),
-    Mountain    = CFrame.new(500, 180, 400),
-    SecretBase  = CFrame.new(-1000, 100, 800),
-    SkyIsland   = CFrame.new(200, 500, -200),
-    -- เพิ่มที่ใหม่ตรงนี้ได้เลย
-    -- ["ชื่อปุ่ม"] = CFrame.new(X, Y, Z),
-}
-
--- ฟังก์ชันวาป (ใช้ซ้ำทุกปุ่ม)
-local function teleportTo(cframe, placeName)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.CFrame = cframe
-    Rayfield:Notify({
-        Title = "วาปสำเร็จ!",
-        Content = "ไป "..placeName.." แล้ว",
-        Duration = 3,
-        Image = 13014647359
-    })
-end
-
--- สร้างปุ่มทีละที่
-for placeName, cframe in pairs(Locations) do
-    tpTab:CreateButton({
-        Name = "วาปไป "..placeName,
-        Callback = function()
-            teleportTo(cframe, placeName)
-        end
-    })
-end
-
 -- ปุ่มด่วน Terrain (ใหญ่ ๆ เด่น ๆ ตามที่ขอ)
 tpTab:CreateButton({
     Name = "วาป Terrain ทันที (จุดหลัก)",
@@ -339,25 +303,6 @@ tpTab:CreateButton({
     end
 })
 
--- ปุ่มรีเซ็ตตำแหน่ง (เผื่อหลุดแมพ)
-tpTab:CreateButton({
-    Name = "รีเซ็ตตัวเอง (กลับสปอน)",
-    Callback = function()
-        local char = player.Character or player.CharacterAdded:Wait()
-        if char then
-            char:BreakJoints()
-            task.wait(0.1)
-            player:LoadCharacter()
-        end
-        Rayfield:Notify({Title = "รีเซ็ตแล้ว", Content = "กลับสปอนใหม่", Duration = 3})
-    end
-})
-
--- คำอธิบายสั้น ๆ
-tpTab:CreateParagraph({
-    Title = "วิธีเพิ่มสถานที่ใหม่",
-    Content = "เปิดสคริปต์ แก้ที่ table Locations\nใส่บรรทัดใหม่แบบนี้:\n[\"ชื่อปุ่มใหม่\"] = CFrame.new(X, Y, Z),\nแล้วรีสตาร์ทสคริปต์ = เสร็จ!"
-})
 
 
 -- === ลูปหลัก ===
