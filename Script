@@ -2,12 +2,12 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
-   Name = "ไลฟ์สาระ ไปวันๆ v1.5 (God Mode)",
-   Icon = 0,
-   LoadingTitle = "ยินดีต้อนรับ Power Panel v1 สคริปต์ของไลฟ์สาระไปวันๆ",
+   Name = "ไลฟ์สาระ ไปวันๆ v2.0",
+   Icon = nil,
+   LoadingTitle = "ยินดีต้อนรับ Power Panel v2.0 สคริปต์ของไลฟ์สาระ ไปวันๆ",
    LoadingSubtitle = "power panel team",
    ShowText = "Rayfield",
-   Theme = "Bloom",
+   Theme = "DarkBlue",
    ToggleUIKeybind = "K",
    DisableRayfieldPrompts = true,
    DisableBuildWarnings = true,
@@ -33,16 +33,6 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
--- ปุ่มมือถือ
-local MobileButton = Instance.new("TextButton")
-MobileButton.Size = UDim2.new(0,100,0,50)
-MobileButton.Position = UDim2.new(0,10,0,10)
-MobileButton.Text = "Rayfield"
-MobileButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-MobileButton.MouseButton1Click:Connect(function()
-    Window:Toggle()
-end)
-
 -- ตัวแปรระบบ
 local Players = game:GetService("Players")
 local RS = game:GetService("RunService")
@@ -57,7 +47,7 @@ local humanoid = char:WaitForChild("Humanoid")
 -- ตัวแปรฟังก์ชัน
 local flying = false
 local vv, gyro
-local flySpeed = 50
+local flySpeed = 200
 local superSpeed = false
 local runSpeed = 32
 local noclipEnabled = false
@@ -98,68 +88,63 @@ local function toggleSpeed(on)
 end
 
 -- === แท็บตัวละคร ===
-local MainTab = Window:CreateTab("ตัวละคร", 6026568198)
-
+local MainTab = Window:CreateTab("ใช้บ่อย")
+MainTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
+MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
+MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
+MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
+MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
-local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,1000}, Increment=1, Suffix=" Speed", CurrentValue=50, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
-local speedToggle = MainTab:CreateToggle({Name="เปิด/ปิด วิ่งเร็ว", CurrentValue=false, Flag="SpeedToggle", Callback=toggleSpeed})
-local speedSlider = MainTab:CreateSlider({Name="ความเร็ววิ่ง", Range={1,1000}, Increment=1, Suffix=" Speed", CurrentValue=32, Flag="RunSpeed", Callback=function(val) runSpeed=val if superSpeed then humanoid.WalkSpeed=runSpeed end end})
-local noclipToggle = MainTab:CreateToggle({Name="เปิด/ปิด Noclip", CurrentValue=false, Flag="NoclipToggle", Callback=function(val) noclipEnabled=val end})
-local infJumpToggle = MainTab:CreateToggle({Name="เปิด/ปิด Infinite Jump", CurrentValue=false, Flag="InfJumpToggle", Callback=function(val) infJumpEnabled=val end})
+local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,200}, Increment=200, Suffix=" Speed", CurrentValue=200, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
 
--- === ลบหมอกถาวร ===
-local OriginalFogEnd = game:GetService("Lighting").FogEnd
-local OriginalFogStart = game:GetService("Lighting").FogStart
-local FogLoopConnection = nil
+-- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
+local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Workspace = game:GetService("Workspace")
+local player = Players.LocalPlayer
 
-local ToggleFog = MainTab:CreateToggle({
-    Name = "ลบหมอก (ถาวร)",
-    CurrentValue = false,
-    Flag = "ToggleFog",
-    Callback = function(val)
-        local Lighting = game:GetService("Lighting")
-        if val then
-            if OriginalFogEnd == nil then OriginalFogEnd = Lighting.FogEnd end
-            if OriginalFogStart == nil then OriginalFogStart = Lighting.FogStart end
-            if FogLoopConnection then FogLoopConnection:Disconnect() end
-            FogLoopConnection = RS.Heartbeat:Connect(function()
-                if not ToggleFog.CurrentValue then return end
-                Lighting.FogEnd = 1000
-                Lighting.FogStart = 1000
-            end)
-            Lighting.FogEnd = 1000
-            Lighting.FogStart = 1000
-            Rayfield:Notify({Title = "ลบหมอก", Content = "หมอกหายถาวร!", Duration = 3})
-        else
-            if FogLoopConnection then FogLoopConnection:Disconnect() FogLoopConnection = nil end
-            Lighting.FogEnd = OriginalFogEnd or 100000
-            Lighting.FogStart = OriginalFogStart or 0
-            Rayfield:Notify({Title = "ลบหมอก", Content = "หมอกกลับมาแล้ว", Duration = 3})
-        end
-    end
-})
+-- สร้างแท็บ
+local friendTab = Window:CreateTab("วาป")
 
--- รองรับ Load Config
-task.spawn(function()
-    task.wait(1)
-    if ToggleFog.CurrentValue then
-        ToggleFog.Callback(true)
-    end
-end)
-
--- === แท็บวาป + ลากศพ ===
-local friendTab = Window:CreateTab("วาป", 6026568198)
-
+-- ===== Helpers =====
 local function getPlayerList()
     local list = {}
-    for _, p in pairs(Players:GetPlayers()) do
+    for _, p in ipairs(Players:GetPlayers()) do
         if p ~= player then
-            table.insert(list, p.DisplayName.." ("..p.Name..")")
+            table.insert(list, string.format("%s (%s)", p.DisplayName, p.Name))
         end
     end
     return list
 end
 
+-- ดึงศพทั้งหมดที่ลงท้ายชื่อด้วย " Body" จากโฟลเดอร์ Characters
+local function getAllBodies()
+    local folder = Workspace:FindFirstChild("Characters")
+    if not folder then return {} end
+    local bodies = {}
+    for _, obj in ipairs(folder:GetChildren()) do
+        if typeof(obj) == "Instance" and typeof(obj.Name) == "string" then
+            if obj.Name:sub(-5) == " Body" then
+                table.insert(bodies, obj)
+            end
+        end
+    end
+    return bodies
+end
+
+-- หา BasePart ใดๆ ในโมเดล (กันกรณีไม่มี PrimaryPart)
+local function findAnyBasePart(model)
+    if not model or not model:IsA("Model") then return nil end
+    if model.PrimaryPart then return model.PrimaryPart end
+    for _, d in ipairs(model:GetDescendants()) do
+        if d:IsA("BasePart") then
+            return d
+        end
+    end
+    return nil
+end
+
+-- ===== UI: Dropdown เพื่อน (ใช้เฉพาะ “วาปไปหาเพื่อน”) =====
 local friendDropdown = friendTab:CreateDropdown({
     Name = "เลือกเพื่อน",
     Options = getPlayerList(),
@@ -167,7 +152,7 @@ local friendDropdown = friendTab:CreateDropdown({
     Flag = "FriendSelect"
 })
 
--- ปุ่มวาปไปหาเพื่อน
+-- ปุ่มวาปไปหาเพื่อน (ใช้ dropdown)
 friendTab:CreateButton({
     Name = "วาปไปหาเพื่อน",
     Callback = function()
@@ -176,20 +161,25 @@ friendTab:CreateButton({
             Rayfield:Notify({Title = "Error", Content = "กรุณาเลือกเพื่อนก่อน!", Duration = 3})
             return
         end
+
         local friendName = selected:match("%((.-)%)") or selected
-        char = player.Character or player.CharacterAdded:Wait()
-        hrp = char:WaitForChild("HumanoidRootPart")
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
         local targetPlayer = Players:FindFirstChild(friendName)
-        if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
-            hrp.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
-            Rayfield:Notify({Title = "Teleport สำเร็จ", Content = "ไปหา "..friendName, Duration = 3})
-        else
-            Rayfield:Notify({Title = "ไม่พบเป้าหมาย", Content = "เพื่อนไม่ออนไลน์", Duration = 3})
+        if targetPlayer and targetPlayer.Character then
+            local thrp = targetPlayer.Character:FindFirstChild("HumanoidRootPart")
+            if thrp then
+                hrp.CFrame = thrp.CFrame + Vector3.new(0, 3, 0)
+                Rayfield:Notify({Title = "Teleport สำเร็จ", Content = "ไปหา "..friendName, Duration = 3})
+                return
+            end
         end
+        Rayfield:Notify({Title = "ไม่พบเป้าหมาย", Content = "เพื่อนไม่ออนไลน์/ไม่มี HRP", Duration = 3})
     end
 })
 
--- === ลากศพเฉพาะชื่อ ===
+-- ===== ตัวปรับค่า ลากศพ =====
 local DragOffset = 5
 local DragDelay = 0.2
 
@@ -197,7 +187,7 @@ friendTab:CreateSlider({
     Name = "ระยะห่างลากศพ (studs)",
     Range = {1, 15},
     Increment = 1,
-    CurrentValue = 5,
+    CurrentValue = DragOffset,
     Flag = "DragOffset",
     Callback = function(val) DragOffset = val end
 })
@@ -206,70 +196,65 @@ friendTab:CreateSlider({
     Name = "ดีเลย์ลาก (วินาที)",
     Range = {0.05, 1},
     Increment = 0.05,
-    CurrentValue = 0.2,
+    CurrentValue = DragDelay,
     Flag = "DragDelay",
     Callback = function(val) DragDelay = val end
 })
 
+-- ===== ปุ่ม “ลากศพทั้งหมด” (ไม่ใช้ dropdown) =====
 friendTab:CreateButton({
-    Name = "ลากศพตามชื่อ",
+    Name = "ลากศพทั้งหมด (ไม่ต้องเลือกชื่อ)",
     Callback = function()
-        local selected = friendDropdown.CurrentOption[1]
-        if not selected then
-            Rayfield:Notify({Title = "ผิดพลาด", Content = "กรุณาเลือกชื่อก่อน!", Duration = 3})
-            return
-        end
-        local displayName = selected:match("^(.+) %(") or selected
+        -- เตรียมตัวเรา
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
 
-        char = player.Character or player.CharacterAdded:Wait()
-        hrp = char:WaitForChild("HumanoidRootPart")
+        -- เตรียม RemoteEvents
+        local remoteEvents = ReplicatedStorage:FindFirstChild("RemoteEvents")
+        local startDragging = remoteEvents and remoteEvents:FindFirstChild("RequestStartDraggingItem")
+        local stopDragging  = remoteEvents and remoteEvents:FindFirstChild("StopDraggingItem")
 
-        local itemsFolder = Workspace:WaitForChild("Characters", 10)
-        local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents", 10)
-        if not itemsFolder or not remoteEvents then
-            Rayfield:Notify({Title = "ผิดพลาด", Content = "ไม่พบ Characters หรือ RemoteEvents", Duration = 5})
-            return
-        end
-
-        local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem", 5)
-        local stopDragging = remoteEvents:WaitForChild("StopDraggingItem", 5)
-        if not startDragging or not stopDragging then
+        if not (startDragging and stopDragging) then
             Rayfield:Notify({Title = "ผิดพลาด", Content = "ไม่พบ RemoteEvent ลากศพ", Duration = 5})
             return
         end
 
-        local targetName = displayName .. " Body"
-        local bodies = {}
-        for _, obj in pairs(itemsFolder:GetChildren()) do
-            if obj.Name == targetName then
-                table.insert(bodies, obj)
-            end
-        end
-
+        -- หา “ศพทั้งหมด”
+        local bodies = getAllBodies()
         if #bodies == 0 then
-            Rayfield:Notify({Title = "ไม่พบศพ", Content = "ไม่มีศพชื่อ \""..targetName.."\"", Duration = 4})
+            Rayfield:Notify({Title = "ไม่พบศพ", Content = "ตอนนี้ยังไม่มีใครตาย", Duration = 4})
             return
         end
 
         Rayfield:Notify({Title = "กำลังลากศพ", Content = "พบ "..#bodies.." ตัว", Duration = 3})
 
         task.spawn(function()
-            for i, body in ipairs(bodies) do
-                local clone = cloneref and cloneref(body) or body
-                startDragging:FireServer(clone)
-                task.wait(0.02)
-                if body.PrimaryPart then
-                    body:PivotTo(hrp.CFrame * CFrame.new(0, 0, -DragOffset))
+            for _, body in ipairs(bodies) do
+                -- กันกรณีออบเจ็กต์หายระหว่างทาง
+                if body and body.Parent then
+                    local inst = (typeof(cloneref) == "function") and cloneref(body) or body
+                    startDragging:FireServer(inst)
+                    task.wait(0.02)
+
+                    -- เลือกพาร์ทอ้างอิงเพื่อวางให้ใกล้ตัวเรา
+                    local refPart = findAnyBasePart(body)
+                    if refPart then
+                        -- ใช้ PivotTo ให้ทั้งโมเดลเลื่อนมาหน้าเรา
+                        body:PivotTo(hrp.CFrame * CFrame.new(0, 0, -DragOffset))
+                    end
+
+                    task.wait(0.05)
+                    stopDragging:FireServer(inst)
+                    task.wait(DragDelay)
                 end
-                task.wait(0.05)
-                stopDragging:FireServer(clone)
-                task.wait(DragDelay)
             end
+
             Rayfield:Notify({Title = "สำเร็จ!", Content = "ลากศพทั้งหมด "..#bodies.." ตัว!", Duration = 4})
         end)
     end
 })
 
+-- ปุ่มรีเฟรชรายชื่อ (มีผลเฉพาะ dropdown วาปเพื่อน)
 friendTab:CreateButton({
     Name = "รีเฟรชรายชื่อ",
     Callback = function()
@@ -278,49 +263,65 @@ friendTab:CreateButton({
     end
 })
 
--- อัปเดต Dropdown
-Players.PlayerAdded:Connect(function() friendDropdown:Set(getPlayerList()) end)
-Players.PlayerRemoving:Connect(function() friendDropdown:Set(getPlayerList()) end)
+-- อัปเดต Dropdown อัตโนมัติ เมื่อมีคนเข้า/ออก (เฉพาะวาปเพื่อน)
+Players.PlayerAdded:Connect(function()
+    friendDropdown:Set(getPlayerList())
+end)
+Players.PlayerRemoving:Connect(function()
+    friendDropdown:Set(getPlayerList())
+end)
+
+-- === แท็บใหม่: วาปสถานที่ ===
+local tpTab = Window:CreateTab("วาปไปที่ต่างๆ")
+
+-- ตารางพิกัด (key = ชื่อในโค้ด, value = พิกัด + ชื่อปุ่มสวย ๆ)
+local Locations = {
+    Terrain     = { CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0),       Display = "แคมป์ไฟ (จุดเกิด)" },
+    -- เพิ่มกี่ที่ก็ได้ตรงนี้
+}
+
+-- ฟังก์ชันวาป (ใช้ซ้ำทุกปุ่ม)
+local function teleportTo(data)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    hrp.CFrame = data.CFrame
+    Rayfield:Notify({
+        Title = "วาปสำเร็จ!",
+        Content = "ไป "..data.Display.." แล้ว",
+        Duration = 3,
+        Image = 13014647359
+    })
+end
+
+-- === สร้างปุ่มอัตโนมัติจากตาราง Locations (แก้จุดผิดพลาดตรงนี้) ===
+for key, data in pairs(Locations) do
+    tpTab:CreateButton({
+        Name = data.Display,
+        Callback = function()
+            teleportTo(data)
+        end
+    })
+end -- <<< อย่าลืม end ตรงนี้!!!
 
 -- === แท็บสคริปต์เพิ่มเติม ===
-local extraTab = Window:CreateTab("God Mode+ดึงของ", 6031280882)
-extraTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
-extraTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
-extraTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
-extraTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
+local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 
--- === แท็บอัพเดต & เครดิต ===
-local updateTab = Window:CreateTab("รายการอัพเดต", 6034989579)
+-- === แท็บอัพเดต ===
+local updateTab = Window:CreateTab("รายการอัพเดต")
+updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
 updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
 updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
 updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
 
-local creditTab2 = Window:CreateTab("เครดิต", 6034989579)
+-- === เครดิต ===
+local creditTab2 = Window:CreateTab("เครดิต")
 creditTab2:CreateLabel("owner by livezala")
 creditTab2:CreateLabel("original script by dion_ktl")
 creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมัส)")
 creditTab2:CreateLabel("อัพเดต 31/10/2025")
 creditTab2:CreateLabel("Discord: dSyCsRpU62")
-
--- === เคาท์ดาวน์ปีใหม่ ===
-local newYearTab = Window:CreateTab("เคาท์ดาวน์ปีใหม่", 6034979821)
-local countdownLabel = newYearTab:CreateLabel("กำลังโหลดเคาท์ดาวน์...")
-local targetTime = os.time({year=2026, month=1, day=1, hour=0, min=0, sec=0})
-local countdownConnection = RS.RenderStepped:Connect(function()
-    local diff = targetTime - os.time()
-    if diff <= 0 then
-        countdownLabel:Set("Happy New Year!")
-        countdownConnection:Disconnect()
-        return
-    end
-    local d = math.floor(diff / 86400)
-    local h = math.floor((diff % 86400) / 3600)
-    local m = math.floor((diff % 3600) / 60)
-    local s = diff % 60
-    countdownLabel:Set(string.format("%02d:%02d:%02d:%02d", d, h, m, s))
-end)
 
 -- === ลูปหลัก ===
 RS.RenderStepped:Connect(function()
