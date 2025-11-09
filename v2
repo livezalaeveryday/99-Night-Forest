@@ -293,15 +293,10 @@ creditTab2:CreateLabel("Discord: dSyCsRpU62")
 
 
 -- === แท็บใหม่: วาปสถานที่ (1 ปุ่ม 1 ที่) ===
-local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
-
--- ปุ่มด่วน Terrain (ใหญ่ ๆ เด่น ๆ ตามที่ขอ)
-tpTab:CreateButton({
-    Name = "วาป Terrain ทันที (จุดหลัก)",
-    Callback = function()
-        teleportTo(Locations.Terrain, "Terrain")
-    end
-})
+local tpTab = Window:CreateTab("วาปสถานที่", 13014647359)
+tpTab:CreateButton({Name = "แค้มไฟ",Callback = function()teleportTo(Locations.Terrain, "Terrain")end})
+tpTab:CreateButton({Name = "xxx",Callback = function()teleportTo(Locations.Terrain, "Terrain")end})
+tpTab:CreateButton({Name = "xxx",Callback = function()teleportTo(Locations.Terrain, "Terrain")end})
 
 
 
