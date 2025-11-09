@@ -100,10 +100,11 @@ end
 -- === แท็บตัวละคร ===
 local MainTab = Window:CreateTab("ตัวละคร", 6026568198)
 
+MainTab:CreateButton({Name = "GOD MODE", Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
-local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,1000}, Increment=1, Suffix=" Speed", CurrentValue=50, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
+local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,150}, Increment=1, Suffix=" Speed", CurrentValue=50, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
 local speedToggle = MainTab:CreateToggle({Name="เปิด/ปิด วิ่งเร็ว", CurrentValue=false, Flag="SpeedToggle", Callback=toggleSpeed})
-local speedSlider = MainTab:CreateSlider({Name="ความเร็ววิ่ง", Range={1,1000}, Increment=1, Suffix=" Speed", CurrentValue=32, Flag="RunSpeed", Callback=function(val) runSpeed=val if superSpeed then humanoid.WalkSpeed=runSpeed end end})
+local speedSlider = MainTab:CreateSlider({Name="ความเร็ววิ่ง", Range={1,150}, Increment=1, Suffix=" Speed", CurrentValue=32, Flag="RunSpeed", Callback=function(val) runSpeed=val if superSpeed then humanoid.WalkSpeed=runSpeed end end})
 local noclipToggle = MainTab:CreateToggle({Name="เปิด/ปิด Noclip", CurrentValue=false, Flag="NoclipToggle", Callback=function(val) noclipEnabled=val end})
 local infJumpToggle = MainTab:CreateToggle({Name="เปิด/ปิด Infinite Jump", CurrentValue=false, Flag="InfJumpToggle", Callback=function(val) infJumpEnabled=val end})
 
@@ -324,7 +325,6 @@ end)
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("God Mode+ดึงของ", 6031280882)
-extraTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
 extraTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
 extraTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
 extraTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
