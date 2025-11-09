@@ -271,6 +271,54 @@ Players.PlayerRemoving:Connect(function()
     friendDropdown:Set(getPlayerList())
 end)
 
+
+-- === แท็บใหม่: วาปสถานที่ (1 ปุ่ม 1 ที่) ===
+local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
+
+-- ตารางพิกัด (แก้ไข/เพิ่มได้เลยตรงนี้)
+local Locations = {
+    Terrain     = CFrame.new(0, 50, 0),        -- แก้พิกัด Terrain ตรงนี้
+    -- เพิ่มที่ใหม่ตรงนี้ได้เลย
+    -- ["ชื่อปุ่ม"] = CFrame.new(X, Y, Z),
+}
+
+-- ฟังก์ชันวาป (ใช้ซ้ำทุกปุ่ม)
+local function teleportTo(cframe, placeName)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    hrp.CFrame = cframe
+    Rayfield:Notify({
+        Title = "วาปสำเร็จ!",
+        Content = "ไป "..placeName.." แล้ว",
+        Duration = 3,
+        Image = 13014647359
+    })
+end
+
+-- สร้างปุ่มทีละที่
+for placeName, cframe in pairs(Locations) do
+    tpTab:CreateButton({
+        Name = "วาปไป "..placeName,
+        Callback = function()
+            teleportTo(cframe, placeName)
+        end
+    })
+end
+
+-- ปุ่มด่วน Terrain (ใหญ่ ๆ เด่น ๆ ตามที่ขอ)
+tpTab:CreateButton({
+    Name = "วาป Terrain ทันที (จุดหลัก)",
+    Callback = function()
+        teleportTo(Locations.Terrain, "Terrain")
+    end
+})
+
+-- คำอธิบายสั้น ๆ
+tpTab:CreateParagraph({
+    Title = "วิธีเพิ่มสถานที่ใหม่",
+    Content = "เปิดสคริปต์ แก้ที่ table Locations\nใส่บรรทัดใหม่แบบนี้:\n[\"ชื่อปุ่มใหม่\"] = CFrame.new(X, Y, Z),\nแล้วรีสตาร์ทสคริปต์ = เสร็จ!"
+})
+
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
@@ -290,15 +338,6 @@ creditTab2:CreateLabel("original script by dion_ktl")
 creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมัส)")
 creditTab2:CreateLabel("อัพเดต 31/10/2025")
 creditTab2:CreateLabel("Discord: dSyCsRpU62")
-
-
--- === แท็บใหม่: วาปสถานที่ (1 ปุ่ม 1 ที่) ===
-local tpTab = Window:CreateTab("วาปสถานที่", 13014647359)
-tpTab:CreateButton({Name = "แค้มไฟ",Callback = function()teleportTo(Locations.Terrain, "Terrain")end})
-tpTab:CreateButton({Name = "xxx",Callback = function()teleportTo(Locations.Terrain, "Terrain")end})
-tpTab:CreateButton({Name = "xxx",Callback = function()teleportTo(Locations.Terrain, "Terrain")end})
-
-
 
 -- === ลูปหลัก ===
 RS.RenderStepped:Connect(function()
