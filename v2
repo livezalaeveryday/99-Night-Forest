@@ -2,11 +2,11 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
-   Name = "ไลฟ์สาระ ไปวันๆ v1.6 (God Mode)",
+   Name = "ไลฟ์สาระ ไปวันๆ v1.6",
    Icon = 0,
    LoadingTitle = "ยินดีต้อนรับ Power Panel v1.6 สคริปต์ของไลฟ์สาระ ไปวันๆ",
    LoadingSubtitle = "power panel team",
-   ShowText = "ไลฟ์สาระ ไปวันๆ",
+   ShowText = "Rayfield",
    Theme = "Bloom",
    ToggleUIKeybind = "K",
    DisableRayfieldPrompts = true,
