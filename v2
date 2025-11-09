@@ -2,11 +2,11 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
-   Name = "ไลฟ์สาระ ไปวันๆ v1.5 (God Mode)",
+   Name = "ไลฟ์สาระ ไปวันๆ v1.6 (God Mode)",
    Icon = 0,
-   LoadingTitle = "ยินดีต้อนรับ Power Panel v1 สคริปต์ของไลฟ์สาระไปวันๆ",
+   LoadingTitle = "ยินดีต้อนรับ Power Panel v1.6 สคริปต์ของไลฟ์สาระ ไปวันๆ",
    LoadingSubtitle = "power panel team",
-   ShowText = "Rayfield",
+   ShowText = "ไลฟ์สาระ ไปวันๆ",
    Theme = "Bloom",
    ToggleUIKeybind = "K",
    DisableRayfieldPrompts = true,
@@ -333,6 +333,7 @@ extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadst
 
 -- === แท็บอัพเดต & เครดิต ===
 local updateTab = Window:CreateTab("รายการอัพเดต", 6034989579)
+updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
 updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
 updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
 updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
