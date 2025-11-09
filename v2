@@ -47,7 +47,7 @@ local humanoid = char:WaitForChild("Humanoid")
 -- ตัวแปรฟังก์ชัน
 local flying = false
 local vv, gyro
-local flySpeed = 50
+local flySpeed = 150
 local superSpeed = false
 local runSpeed = 32
 local noclipEnabled = false
@@ -88,8 +88,9 @@ local function toggleSpeed(on)
 end
 
 -- === แท็บตัวละคร ===
-local MainTab = Window:CreateTab("ตัวละคร")
+local MainTab = Window:CreateTab("ใช้บ่อย")
 MainTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
+MainTab:CreateButton({Name = "กลับบ้าน",Callback = function()teleportTo(Locations.Terrain)end})
 MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
 MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
 MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
