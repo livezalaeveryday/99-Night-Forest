@@ -291,6 +291,105 @@ creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมั�
 creditTab2:CreateLabel("อัพเดต 31/10/2025")
 creditTab2:CreateLabel("Discord: dSyCsRpU62")
 
+
+-- === แท็บใหม่: วาปสถานที่ ===
+local teleportTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนรูปแผนที่
+
+-- ตารางพิกัดสถานที่ (แก้ไข/เพิ่มได้เลยตรงนี้)
+local TeleportLocations = {
+    ["Terrain"]         = CFrame.new(0, 50, 0),        -- แก้พิกัดตรงนี้
+    ["Spawn"]           = CFrame.new(0, 10, 0),
+    ["Safe Zone"]       = CFrame.new(150, 15, 150),
+    ["Forest"]          = CFrame.new(-300, 20, -250),
+    ["Mountain"]        = CFrame.new(500, 180, 400),
+    ["Secret Base"]     = CFrame.new(-1000, 100, 800),
+    ["Sky Island"]      = CFrame.new(200, 500, -200)
+}
+
+-- Dropdown เลือกสถานที่
+local locationDropdown = teleportTab:CreateDropdown({
+    Name = "เลือกสถานที่",
+    Options = {
+        "Terrain",
+        "Spawn",
+        "Safe Zone",
+        "Forest",
+        "Mountain",
+        "Secret Base",
+        "Sky Island"
+    },
+    CurrentOption = {"Terrain"},
+    Flag = "LocationSelect",
+    Callback = function() end
+})
+
+-- ปุ่มวาปตามที่เลือก
+teleportTab:CreateButton({
+    Name = "วาปไปสถานที่ที่เลือก",
+    Callback = function()
+        local selected = locationDropdown.CurrentOption[1]
+        if not selected then
+            Rayfield:Notify({Title = "ข้อผิดพลาด", Content = "กรุณาเลือกสถานที่ก่อน!", Duration = 3})
+            return
+        end
+
+        local targetCFrame = TeleportLocations[selected]
+        if not targetCFrame then
+            Rayfield:Notify({Title = "ไม่พบพิกัด", Content = "ไม่มีข้อมูลสถานที่นี้", Duration = 3})
+            return
+        end
+
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        hrp.CFrame = targetCFrame
+
+        Rayfield:Notify({
+            Title = "วาปสำเร็จ!",
+            Content = "ไปยัง "..selected.." แล้ว",
+            Duration = 3,
+            Image = 13014647359
+        })
+    end
+})
+
+-- ปุ่มวาป Terrain ทันที (ปุ่มด่วน)
+teleportTab:CreateButton({
+    Name = "วาป Terrain ทันที",
+    Callback = function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        hrp.CFrame = CFrame.new(0, 50, 0) -- แก้พิกัด Terrain ตรงนี้ได้
+
+        Rayfield:Notify({
+            Title = "วาป Terrain สำเร็จ!",
+            Content = "ถึง Terrain แล้ว บินต่อได้เลย!",
+            Duration = 4,
+            Image = 6026568198
+        })
+    end
+})
+
+-- ปุ่มรีเฟรชรายชื่อสถานที่ (กรณีเพิ่มสถานที่ใหม่ตอนรัน)
+teleportTab:CreateButton({
+    Name = "รีเฟรชรายชื่อสถานที่",
+    Callback = function()
+        local newList = {}
+        for name, _ in pairs(TeleportLocations) do
+            table.insert(newList, name)
+        end
+        locationDropdown:Set(newList)
+        Rayfield:Notify({Title = "อัปเดตแล้ว", Content = "รีเฟรชรายชื่อสถานที่สำเร็จ", Duration = 2})
+    end
+})
+
+-- ข้อความอธิบาย
+teleportTab:CreateLabel("วิธีหาพิกัดใหม่:")
+teleportTab:CreateLabel("1. ไปยืนที่จุดที่ต้องการ")
+teleportTab:CreateLabel("2. กด F9 แล้วพิมพ์:")
+teleportTab:CreateLabel('print(game.Players.LocalPlayer.Character.HumanoidRootPart.CFrame)')
+teleportTab:CreateLabel("3. คัดลอกค่า CFrame มาใส่ใน TeleportLocations")
+
+
 -- === ลูปหลัก ===
 RS.RenderStepped:Connect(function()
     if flying and vv and gyro and hrp and humanoid then
