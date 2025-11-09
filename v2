@@ -127,8 +127,6 @@ for key, data in pairs(Locations) do
             teleportTo(data)
         end
     })
-end
-})
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
