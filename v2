@@ -276,8 +276,8 @@ local tpTab = Window:CreateTab("วาปไปที่ต่างๆ")
 
 -- ตารางพิกัด (key = ชื่อในโค้ด, value = พิกัด + ชื่อปุ่มสวย ๆ)
 local Locations = {
-    Terrain     = { CFrame = CFrame.new(0, 50, 0),       Display = "แคมป์ไฟ (จุดเกิด)" },
-    Stronghold  = { CFrame = CFrame.new(-789, 80, 234), Display = "ป้อมปราการลับ" },
+    Terrain     = { CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0),       Display = "แคมป์ไฟ (จุดเกิด)" },
+    Stronghold  = { CFrame = CFrame.new(0, 50, 0), Display = "ป้อมปราการลับ" },
     -- เพิ่มกี่ที่ก็ได้ตรงนี้
 }
 
