@@ -97,6 +97,39 @@ local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การ�
 local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,150}, Increment=1, Suffix=" Speed", CurrentValue=150, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
 local noclipToggle = MainTab:CreateToggle({Name="เปิด/ปิด Noclip", CurrentValue=false, Flag="NoclipToggle", Callback=function(val) noclipEnabled=val end})
 
+-- === แท็บใหม่: วาปสถานที่ ===
+local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
+
+-- ตารางพิกัด (key = ชื่อจริงในโค้ด, value = พิกัด + ชื่อที่โชว์ในปุ่ม)
+local Locations = {
+    Terrain     = { CFrame = CFrame.new(0, 0, 0),   Display = "แคมป์ไฟ" },
+    -- เพิ่มกี่ที่ก็ได้ตรงนี้
+}
+
+-- ฟังก์ชันวาป (ใช้ซ้ำทุกปุ่ม)
+local function teleportTo(data)
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hrp = char:WaitForChild("HumanoidRootPart")
+    hrp.CFrame = data.CFrame
+    Rayfield:Notify({
+        Title = "วาปสำเร็จ!",
+        Content = "ไป "..data.Display.." แล้ว",
+        Duration = 3,
+        Image = 13014647359
+    })
+end
+
+-- สร้างปุ่มอัตโนมัติจากตาราง Locations
+for key, data in pairs(Locations) do
+    tpTab:CreateButton({
+        Name = data.Display,  -- ชื่อปุ่มสวย ๆ ที่ผู้เล่นเห็น
+        Callback = function()
+            teleportTo(data)
+        end
+    })
+end
+})
+
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -290,49 +323,6 @@ creditTab2:CreateLabel("original script by dion_ktl")
 creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมัส)")
 creditTab2:CreateLabel("อัพเดต 31/10/2025")
 creditTab2:CreateLabel("Discord: dSyCsRpU62")
-
-
--- === แท็บใหม่: วาปสถานที่ ===
-local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
-
--- ตารางพิกัด (key = ชื่อจริงในโค้ด, value = พิกัด + ชื่อที่โชว์ในปุ่ม)
-local Locations = {
-    Terrain     = { CFrame = CFrame.new(123, 50, -456),   Display = "🌍 Terrain หลัก (กลางแมพ)" },
-    Stronghold  = { CFrame = CFrame.new(-789, 80, 234),   Display = "🏰 ป้อมปราการลับ" },
-    -- เพิ่มกี่ที่ก็ได้ตรงนี้
-}
-
--- ฟังก์ชันวาป (ใช้ซ้ำทุกปุ่ม)
-local function teleportTo(data)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.CFrame = data.CFrame
-    Rayfield:Notify({
-        Title = "วาปสำเร็จ!",
-        Content = "ไป "..data.Display.." แล้ว",
-        Duration = 3,
-        Image = 13014647359
-    })
-end
-
--- สร้างปุ่มอัตโนมัติจากตาราง Locations
-for key, data in pairs(Locations) do
-    tpTab:CreateButton({
-        Name = data.Display,  -- ชื่อปุ่มสวย ๆ ที่ผู้เล่นเห็น
-        Callback = function()
-            teleportTo(data)
-        end
-    })
-end
-
--- ถ้าอยากมีปุ่มใหญ่ ๆ ด่วนด้านบนสุด (เช่น Terrain ที่คนใช้บ่อยสุด)
-tpTab:CreateButton({
-    Name = "Terrain หลัก (ทางลัด)",
-    Callback = function()
-        teleportTo(Locations.Terrain)
-    end
-})
-
 
 -- === ลูปหลัก ===
 RS.RenderStepped:Connect(function()
