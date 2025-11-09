@@ -271,14 +271,12 @@ Players.PlayerRemoving:Connect(function()
     friendDropdown:Set(getPlayerList())
 end)
 
-
-
 -- === แท็บใหม่: วาปสถานที่ ===
-local tpTab = Window:CreateTab("วาป")
+local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
 
 -- ตารางพิกัด (key = ชื่อจริงในโค้ด, value = พิกัด + ชื่อที่โชว์ในปุ่ม)
 local Locations = {
-    Terrain     = { CFrame = CFrame.new(0, 50, 0),   Display = "กองไฟ" },
+    Terrain     = { CFrame = CFrame.new(0, 50, 0),   Display = "แคมป์ไฟ" },
     -- เพิ่มกี่ที่ก็ได้ตรงนี้
 }
 
@@ -303,8 +301,6 @@ for key, data in pairs(Locations) do
             teleportTo(data)
         end
     })
-end
-})
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
