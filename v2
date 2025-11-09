@@ -272,7 +272,7 @@ Players.PlayerRemoving:Connect(function()
 end)
 
 -- === แท็บใหม่: วาปสถานที่ ===
-local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
+local tpTab = Window:CreateTab("วาปสถานที่")
 
 -- ตารางพิกัด (key = ชื่อในโค้ด, value = พิกัด + ชื่อปุ่มสวย ๆ)
 local Locations = {
