@@ -89,7 +89,6 @@ end
 
 -- === แท็บตัวละคร ===
 local MainTab = Window:CreateTab("ตัวละคร")
-
 MainTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
 MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
 MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
@@ -277,13 +276,14 @@ local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 
--- === แท็บอัพเดต & เครดิต ===
+-- === แท็บอัพเดต ===
 local updateTab = Window:CreateTab("รายการอัพเดต")
 updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
 updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
 updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
 updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
 
+-- === เครดิต ===
 local creditTab2 = Window:CreateTab("เครดิต")
 creditTab2:CreateLabel("owner by livezala")
 creditTab2:CreateLabel("original script by dion_ktl")
