@@ -274,9 +274,10 @@ end)
 -- === แท็บใหม่: วาปสถานที่ ===
 local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
 
--- ตารางพิกัด (key = ชื่อจริงในโค้ด, value = พิกัด + ชื่อที่โชว์ในปุ่ม)
+-- ตารางพิกัด (key = ชื่อในโค้ด, value = พิกัด + ชื่อปุ่มสวย ๆ)
 local Locations = {
-    Terrain     = { CFrame = CFrame.new(0, 50, 0),   Display = "แคมป์ไฟ" },
+    Terrain     = { CFrame = CFrame.new(0, 50, 0),       Display = "แคมป์ไฟ (จุดเกิด)" },
+    Stronghold  = { CFrame = CFrame.new(-789, 80, 234), Display = "ป้อมปราการลับ" },
     -- เพิ่มกี่ที่ก็ได้ตรงนี้
 }
 
@@ -293,14 +294,23 @@ local function teleportTo(data)
     })
 end
 
--- สร้างปุ่มอัตโนมัติจากตาราง Locations
+-- === สร้างปุ่มอัตโนมัติจากตาราง Locations (แก้จุดผิดพลาดตรงนี้) ===
 for key, data in pairs(Locations) do
     tpTab:CreateButton({
-        Name = data.Display,  -- ชื่อปุ่มสวย ๆ ที่ผู้เล่นเห็น
+        Name = data.Display,
         Callback = function()
             teleportTo(data)
         end
     })
+end -- <<< อย่าลืม end ตรงนี้!!!
+
+-- ปุ่มด่วน: วาปแคมป์ไฟ (คนใช้บ่อยสุด)
+tpTab:CreateButton({
+    Name = "แคมป์ไฟ (ทางลัด)",
+    Callback = function()
+        teleportTo(Locations.Terrain)
+    end
+})
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
