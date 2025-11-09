@@ -97,12 +97,12 @@ local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การ�
 local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,150}, Increment=1, Suffix=" Speed", CurrentValue=150, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
 local noclipToggle = MainTab:CreateToggle({Name="เปิด/ปิด Noclip", CurrentValue=false, Flag="NoclipToggle", Callback=function(val) noclipEnabled=val end})
 
--- === แท็บใหม่: วาปสถานที่ ===
+-- === แท็บใหม่: วาปสถานที่ (1 ปุ่ม 1 ที่ + ชื่อปุ่มสวย ๆ) ===
 local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
 
 -- ตารางพิกัด (key = ชื่อจริงในโค้ด, value = พิกัด + ชื่อที่โชว์ในปุ่ม)
 local Locations = {
-    Terrain     = { CFrame = CFrame.new(0, 0, 0),   Display = "แคมป์ไฟ" },
+    Terrain     = { CFrame = CFrame.new(123, 50, -456),   Display = "กองไฟ" },
     -- เพิ่มกี่ที่ก็ได้ตรงนี้
 }
 
@@ -127,6 +127,7 @@ for key, data in pairs(Locations) do
             teleportTo(data)
         end
     })
+end
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
