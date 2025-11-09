@@ -1,4 +1,3 @@
--- // ไลฟ์สาระ ไปวันๆ v1.6 - Power Panel สุดสวย by thomas //
 local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 local Window = Rayfield:CreateWindow({
