@@ -91,8 +91,6 @@ end
 local MainTab = Window:CreateTab("ใช้บ่อย")
 MainTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
 
--- ปุ่มด่วนในแท็บตัวละคร
-MainTab:CreateSection("ทางลัดวาป")
 MainTab:CreateButton({
     Name = "แคมป์ไฟ (ด่วน)",
     Callback = function()
