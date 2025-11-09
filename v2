@@ -271,25 +271,6 @@ Players.PlayerRemoving:Connect(function()
     friendDropdown:Set(getPlayerList())
 end)
 
--- === แท็บสคริปต์เพิ่มเติม ===
-local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
-extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
-extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
-
--- === แท็บอัพเดต ===
-local updateTab = Window:CreateTab("รายการอัพเดต")
-updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
-updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
-updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
-updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
-
--- === เครดิต ===
-local creditTab2 = Window:CreateTab("เครดิต")
-creditTab2:CreateLabel("owner by livezala")
-creditTab2:CreateLabel("original script by dion_ktl")
-creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมัส)")
-creditTab2:CreateLabel("อัพเดต 31/10/2025")
-creditTab2:CreateLabel("Discord: dSyCsRpU62")
 
 
 -- === แท็บใหม่: วาปสถานที่ ===
@@ -333,6 +314,27 @@ tpTab:CreateButton({
     end
 })
 
+
+
+-- === แท็บสคริปต์เพิ่มเติม ===
+local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
+extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
+extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
+
+-- === แท็บอัพเดต ===
+local updateTab = Window:CreateTab("รายการอัพเดต")
+updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
+updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
+updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
+updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
+
+-- === เครดิต ===
+local creditTab2 = Window:CreateTab("เครดิต")
+creditTab2:CreateLabel("owner by livezala")
+creditTab2:CreateLabel("original script by dion_ktl")
+creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมัส)")
+creditTab2:CreateLabel("อัพเดต 31/10/2025")
+creditTab2:CreateLabel("Discord: dSyCsRpU62")
 
 -- === ลูปหลัก ===
 RS.RenderStepped:Connect(function()
