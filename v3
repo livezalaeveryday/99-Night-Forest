@@ -1,0 +1,284 @@
+-- // ไลฟ์สาระ ไปวันๆ v1.6 - Power Panel สุดสวย by thomas //
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+   Name = "ไลฟ์สาระ ไปวันๆ v1.6",
+   Icon = "rbxassetid://6026568198",
+   LoadingTitle = "ยินดีต้อนรับ Power Panel v1.6",
+   LoadingSubtitle = "power panel team | thomas on top",
+   ShowText = "Rayfield",
+   LoadingMusic = { Enabled = true, SoundId = "rbxassetid://1837849971", Volume = 0.3 },
+   Background = { Enabled = true, Image = "rbxassetid://18303907039", Transparency = 0.85 },
+   Parallax = { Enabled = true, Image = "rbxassetid://18303907039", Speed = 0.05 },
+   Animations = { Enabled = true, Duration = 0.4, EasingStyle = Enum.EasingStyle.Quint },
+   Theme = "Bloom",
+   CustomTheme = {
+       Background = Color3.fromRGB(15, 15, 20),
+       Accent = Color3.fromRGB(255, 140, 0),
+       Text = Color3.fromRGB(255, 255, 255),
+       Secondary = Color3.fromRGB(30, 30, 40),
+       Success = Color3.fromRGB(0, 255, 100),
+       Warning = Color3.fromRGB(255, 200, 0),
+       Error = Color3.fromRGB(255, 60, 60)
+   },
+   ToggleUIKeybind = "K",
+   DisableRayfieldPrompts = true,
+   DisableBuildWarnings = true,
+   ConfigurationSaving = {
+      Enabled = true,
+      FolderName = "LiveZala",
+      FileName = "BigHub"
+   },
+   Discord = { Enabled = false },
+   KeySystem = false
+})
+
+Rayfield:CreateWatermark({Text = "ไลฟ์สาระ ไปวันๆ v1.6 | thomas on top", Font = Enum.Font.GothamBold, TextSize = 14, Transparency = 0.3})
+
+-- Services
+local Players = game:GetService("Players")
+local RS = game:GetService("RunService")
+local UIS = game:GetService("UserInputService")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local player = Players.LocalPlayer
+local char = player.Character or player.CharacterAdded:Wait()
+local hrp = char:WaitForChild("HumanoidRootPart")
+local humanoid = char:WaitForChild("Humanoid")
+
+-- Variables
+local flying = false
+local vv, gyro
+local flySpeed = 200
+local superSpeed = false
+local runSpeed = 32
+local noclipEnabled = false
+local infJumpEnabled = false
+
+-- Notify Helper (เสียง + รูป)
+local function noti(title, content, duration)
+    Rayfield:Notify({
+        Title = title,
+        Content = content,
+        Duration = duration or 3,
+        Image = "rbxassetid://6026568198",
+        Sound = { Id = "rbxassetid://1837849971", Volume = 0.4 }
+    })
+end
+
+-- === ฟังก์ชันบิน ===
+local function startFlying()
+    if flying then return end
+    flying = true
+    humanoid.PlatformStand = true
+    vv = Instance.new("BodyVelocity")
+    vv.MaxForce = Vector3.new(1e5,1e5,1e5)
+    vv.P = 1250
+    vv.Velocity = Vector3.zero
+    vv.Parent = hrp
+    gyro = Instance.new("BodyGyro")
+    gyro.MaxTorque = Vector3.new(4e5,4e5,4e5)
+    gyro.P = 3000
+    gyro.CFrame = hrp.CFrame
+    gyro.Parent = hrp
+    noti("โหมดบินเปิด!", "ใช้ W,A,S,D,Space,Shift เพื่อควบคุม")
+end
+
+local function stopFlying()
+    if not flying then return end
+    flying = false
+    if vv then vv:Destroy() vv=nil end
+    if gyro then gyro:Destroy() gyro=nil end
+    humanoid.PlatformStand = false
+    noti("โหมดบินปิด", "ลงจอดเรียบร้อย")
+end
+
+-- === แท็บใช้บ่อย ===
+local MainTab = Window:CreateTab("ใช้บ่อย", "rbxassetid://6026568198")
+MainTab:CreateSection("ตัวละครหลัก")
+MainTab:CreateParagraph({Title = "คำเตือน", Content = "ห้ามใช้ต่อหน้าคนเยอะ อาจโดนแบนได้นะครับผม\nใช้แล้วรับผิดชอบเองเด้อ ~ ไลฟ์สาระ"})
+
+MainTab:CreateButton({Name = "GOD MODE", Callback = function()
+    loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()
+    for i=1,5 do
+        noti("GOD MODE ACTIVE!", "คุณคือเทพเจ้าแห่งป่าแล้ว")
+        task.wait(0.3)
+    end
+end})
+
+MainTab:CreateButton({Name = "หนีกลับบ้าน", Callback = function()
+    hrp.CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)
+    noti("วาปด่วน!", "ถึงบ้านแล้ว ปลอดภัย!")
+end})
+
+MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() noti("เติมไฟสำเร็จ!", "ไฟลุกโชน!") end})
+MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() noti("ดึงยาแล้ว!", "พร้อมลุยต่อ!") end})
+MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() noti("ดึงเหล็กแล้ว!", "พร้อมตีบวก!") end})
+
+local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Callback=function(val) if val then startFlying() else stopFlying() end end})
+local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,1000}, Increment=10, Suffix=" Speed", CurrentValue=200, Callback=function(val) flySpeed=val end})
+
+-- === แท็บวาป + ลากศพ ===
+local friendTab = Window:CreateTab("วาป & ลากศพ", "rbxassetid://6026568198")
+
+-- Helper
+local function getPlayerList()
+    local list = {}
+    for _, p in ipairs(Players:GetPlayers()) do
+        if p ~= player then
+            table.insert(list, string.format("%s (%s)", p.DisplayName, p.Name))
+        end
+    end
+    return list
+end
+
+local function getAllBodies()
+    local folder = Workspace:FindFirstChild("Characters")
+    if not folder then return {} end
+    local bodies = {}
+    for _, obj in ipairs(folder:GetChildren()) do
+        if obj.Name:sub(-5) == " Body" then
+            table.insert(bodies, obj)
+        end
+    end
+    return bodies
+end
+
+local function findAnyBasePart(model)
+    if model.PrimaryPart then return model.PrimaryPart end
+    for _, d in ipairs(model:GetDescendants()) do
+        if d:IsA("BasePart") then return d end
+    end
+    return nil
+end
+
+-- Dropdown เพื่อน
+local friendDropdown = friendTab:CreateDropdown({Name = "เลือกเพื่อน", Options = getPlayerList(), CurrentOption = {}})
+
+friendTab:CreateButton({Name = "วาปไปหาเพื่อน", Callback = function()
+    local selected = friendDropdown.CurrentOption[1]
+    if not selected then noti("Error", "กรุณาเลือกเพื่อนก่อน!") return end
+    local friendName = selected:match("%((.-)%)") or selected
+    local targetPlayer = Players:FindFirstChild(friendName)
+    if targetPlayer and targetPlayer.Character and targetPlayer.Character:FindFirstChild("HumanoidRootPart") then
+        hrp.CFrame = targetPlayer.Character.HumanoidRootPart.CFrame + Vector3.new(0,3,0)
+        noti("วาปสำเร็จ!", "ไปหา "..friendName)
+    else
+        noti("ไม่พบเป้าหมาย", "เพื่อนไม่ออนไลน์")
+    end
+end})
+
+friendTab:CreateButton({Name = "รีเฟรชรายชื่อ", Callback = function()
+    friendDropdown:Set(getPlayerList())
+    noti("อัปเดตแล้ว", "รีเฟรชรายชื่อสำเร็จ")
+end})
+
+Players.PlayerAdded:Connect(function() friendDropdown:Set(getPlayerList()) end)
+Players.PlayerRemoving:Connect(function() friendDropdown:Set(getPlayerList()) end)
+
+-- ลากศพ
+local DragOffset = 5
+local DragDelay = 0.2
+friendTab:CreateSlider({Name = "ระยะห่างลากศพ (studs)", Range = {1,15}, Increment = 1, CurrentValue = 5, Callback = function(v) DragOffset = v end})
+friendTab:CreateSlider({Name = "ดีเลย์ลาก (วินาที)", Range = {0.05,1}, Increment = 0.05, CurrentValue = 0.2, Callback = function(v) DragDelay = v end})
+
+friendTab:CreateButton({Name = "ลากศพทั้งหมด (ไม่ต้องเลือกชื่อ)", Callback = function()
+    local remoteEvents = ReplicatedStorage:FindFirstChild("RemoteEvents")
+    local startDragging = remoteEvents and remoteEvents:FindFirstChild("RequestStartDraggingItem")
+    local stopDragging = remoteEvents and remoteEvents:FindFirstChild("StopDraggingItem")
+    if not (startDragging and stopDragging) then noti("ผิดพลาด", "ไม่พบ RemoteEvent ลากศพ") return end
+
+    local bodies = getAllBodies()
+    if #bodies == 0 then noti("ไม่พบศพ", "ตอนนี้ยังไม่มีใครตาย") return end
+
+    noti("กำลังลากศพ", "พบ "..#bodies.." ตัว")
+    task.spawn(function()
+        for _, body in ipairs(bodies) do
+            if body and body.Parent then
+                local inst = (typeof(cloneref)=="function") and cloneref(body) or body
+                startDragging:FireServer(inst)
+                task.wait(0.02)
+                local ref = findAnyBasePart(body)
+                if ref then body:PivotTo(hrp.CFrame * CFrame.new(0,0,-DragOffset)) end
+                task.wait(0.05)
+                stopDragging:FireServer(inst)
+                task.wait(DragDelay)
+            end
+        end
+        noti("สำเร็จ!", "ลากศพทั้งหมด "..#bodies.." ตัว!")
+    end)
+end})
+
+-- === แท็บวาปสถานที่ ===
+local tpTab = Window:CreateTab("วาปสถานที่", "rbxassetid://6026568198")
+local Locations = {
+    { CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0), Display = "แคมป์ไฟ (จุดเกิด)" },
+}
+for _, data in ipairs(Locations) do
+    tpTab:CreateButton({Name = data.Display, Callback = function()
+        hrp.CFrame = data.CFrame
+        noti("วาปสำเร็จ!", "ไป "..data.Display)
+    end})
+end
+
+tpTab:CreateButton({Name = "สุ่มวาปในป่า (เสี่ยงตาย)", Callback = function()
+    local pos = Vector3.new(math.random(-500,500), 60, math.random(-500,500))
+    hrp.CFrame = CFrame.new(pos)
+    noti("วาปสุ่ม!", "ขอให้โชคดีไม่เจอหมีนะครับ", 6)
+end})
+
+-- === แท็บสคริปต์อื่น ===
+local extraTab = Window:CreateTab("Script ค่ายอื่น", "rbxassetid://6026568198")
+extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
+extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
+extraTab:CreateButton({Name = "ปิดไฟทั้งเซิร์ฟ (มืดสนิท)", Callback = function()
+    game.Lighting.Brightness = 0
+    game.Lighting.GlobalShadows = true
+    game.Lighting.FogEnd = 100
+    game.Lighting.FogStart = 0
+    noti("ไฟดับ!", "วิ่งหนีผีกันเถอะ", 6)
+end})
+
+-- === แท็บอัพเดต & เครดิต ===
+local updateTab = Window:CreateTab("อัพเดต", "rbxassetid://6026568198")
+updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ + UI สวยสุด")
+updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
+updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
+
+local creditTab = Window:CreateTab("เครดิต", "rbxassetid://6026568198")
+creditTab:CreateLabel("owner by livezala")
+creditTab:CreateLabel("original script by dion_ktl")
+creditTab:CreateLabel("พัฒนาต่อ + ตกแต่งสวยโดย thomas (โทมัส)")
+creditTab:CreateLabel("อัพเดต 10/11/2025")
+creditTab:CreateLabel("Discord: dSyCsRpU62")
+
+-- === ลูปหลัก ===
+RS.RenderStepped:Connect(function()
+    if flying and vv and gyro and hrp then
+        local cam = workspace.CurrentCamera
+        local forward = Vector3.new(cam.CFrame.LookVector.X, 0, cam.CFrame.LookVector.Z).unit
+        local right = Vector3.new(cam.CFrame.RightVector.X, 0, cam.CFrame.RightVector.Z).unit
+        local move = Vector3.zero
+        if UIS:IsKeyDown(Enum.KeyCode.W) then move = move + forward end
+        if UIS:IsKeyDown(Enum.KeyCode.S) then move = move - forward end
+        if UIS:IsKeyDown(Enum.KeyCode.A) then move = move - right end
+        if UIS:IsKeyDown(Enum.KeyCode.D) then move = move + right end
+        if UIS:IsKeyDown(Enum.KeyCode.Space) then move = move + Vector3.new(0,1,0) end
+        if UIS:IsKeyDown(Enum.KeyCode.LeftShift) then move = move + Vector3.new(0,-1,0) end
+        vv.Velocity = move.magnitude > 0 and move.unit * flySpeed or Vector3.zero
+        if move.X ~= 0 or move.Z ~= 0 then
+            gyro.CFrame = CFrame.new(hrp.Position, hrp.Position + Vector3.new(move.X, 0, move.Z))
+        end
+    end
+end)
+
+player.CharacterAdded:Connect(function(c)
+    char = c
+    hrp = c:WaitForChild("HumanoidRootPart")
+    humanoid = c:WaitForChild("Humanoid")
+    stopFlying()
+    task.wait(1)
+    Rayfield:LoadConfiguration()
+end)
+
+noti("โหลดสำเร็จ!", "พร้อมลุย ไลฟ์สาระ ไปวันๆ!", 5)
