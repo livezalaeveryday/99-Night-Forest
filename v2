@@ -158,14 +158,6 @@ local function findAnyBasePart(model)
     return nil
 end
 
--- ===== UI: Dropdown เพื่อน (ใช้เฉพาะ “วาปไปหาเพื่อน”) =====
-local friendDropdown = friendTab:CreateDropdown({
-    Name = "เลือกเพื่อน",
-    Options = getPlayerList(),
-    CurrentOption = {},
-    Flag = "FriendSelect"
-})
-
 -- ปุ่มรีเฟรชรายชื่อ (มีผลเฉพาะ dropdown วาปเพื่อน)
 friendTab:CreateButton({
     Name = "รีเฟรชรายชื่อ",
@@ -173,6 +165,14 @@ friendTab:CreateButton({
         friendDropdown:Set(getPlayerList())
         Rayfield:Notify({Title = "อัปเดตแล้ว", Content = "รีเฟรชรายชื่อสำเร็จ", Duration = 3})
     end
+})
+
+-- ===== UI: Dropdown เพื่อน (ใช้เฉพาะ “วาปไปหาเพื่อน”) =====
+local friendDropdown = friendTab:CreateDropdown({
+    Name = "เลือกเพื่อน",
+    Options = getPlayerList(),
+    CurrentOption = {},
+    Flag = "FriendSelect"
 })
 
 -- ปุ่มวาปไปหาเพื่อน (ใช้ dropdown)
