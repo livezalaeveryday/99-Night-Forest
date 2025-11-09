@@ -2,9 +2,9 @@ local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
-   Name = "ไลฟ์สาระ ไปวันๆ v1.6",
+   Name = "ไลฟ์สาระ ไปวันๆ v2.0",
    Icon = nil,
-   LoadingTitle = "ยินดีต้อนรับ Power Panel v1.6 สคริปต์ของไลฟ์สาระ ไปวันๆ",
+   LoadingTitle = "ยินดีต้อนรับ Power Panel v2.0 สคริปต์ของไลฟ์สาระ ไปวันๆ",
    LoadingSubtitle = "power panel team",
    ShowText = "Rayfield",
    Theme = "Bloom",
@@ -95,7 +95,7 @@ MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstr
 MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
 MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
-local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,1000}, Increment=1, Suffix=" Speed", CurrentValue=50, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
+local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,200}, Increment=200, Suffix=" Speed", CurrentValue=200, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
