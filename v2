@@ -283,10 +283,13 @@ Players.PlayerAdded:Connect(function() friendDropdown:Set(getPlayerList()) end)
 Players.PlayerRemoving:Connect(function() friendDropdown:Set(getPlayerList()) end)
 
 -- === แท็บสคริปต์เพิ่มเติม ===
-local extraTab = Window:CreateTab("99คืนในป่าค่ายอื่น", 6031280882)
+local extraTab = Window:CreateTab("God Mode+ดึงของ", 6031280882)
 extraTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
-extraTab:CreateButton({Name = "รัน SomTank", Callback = function() loadstring(game:HttpGet('https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v3'))() end})
-extraTab:CreateButton({Name = "รัน Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
+extraTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
+extraTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
+extraTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
+extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
+extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 
 -- === แท็บอัพเดต & เครดิต ===
 local updateTab = Window:CreateTab("รายการอัพเดต", 6034989579)
