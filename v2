@@ -33,15 +33,188 @@ local Window = Rayfield:CreateWindow({
    }
 })
 
--- ปุ่มมือถือ
-local MobileButton = Instance.new("TextButton")
-MobileButton.Size = UDim2.new(0,100,0,50)
-MobileButton.Position = UDim2.new(0,10,0,10)
+
+
+
+
+
+
+
+
+
+
+-- === Rayfield Mobile Button: Draggable + Resizable (Double-Tap) ===
+local Players = game:GetService("Players")
+local UIS = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
+
+-- สร้าง/หา ScreenGui
+local gui = playerGui:FindFirstChild("RayfieldMobileGui") or Instance.new("ScreenGui")
+gui.Name = "RayfieldMobileGui"
+gui.ResetOnSpawn = false
+gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+gui.IgnoreGuiInset = true
+gui.Parent = playerGui
+
+-- ขนาดปุ่มเป็น preset: S/M/L
+local sizes = {
+    Small  = UDim2.new(0, 80, 0, 40),
+    Medium = UDim2.new(0, 110, 0, 55),
+    Large  = UDim2.new(0, 140, 0, 70),
+}
+local sizeOrder = {"Small","Medium","Large"}
+local sizeIndex = 2 -- เริ่ม Medium
+
+-- ปุ่มหลัก
+local MobileButton = gui:FindFirstChild("RayfieldButton") or Instance.new("TextButton")
+MobileButton.Name = "RayfieldButton"
+MobileButton.Size = sizes[sizeOrder[sizeIndex]]
+MobileButton.Position = MobileButton.Position ~= nil and MobileButton.Position or UDim2.new(0, 10, 0, 10)
+MobileButton.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+MobileButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+MobileButton.Font = Enum.Font.GothamBold
+MobileButton.TextScaled = true
+MobileButton.AutoButtonColor = true
 MobileButton.Text = "Rayfield"
-MobileButton.Parent = game.Players.LocalPlayer:WaitForChild("PlayerGui")
-MobileButton.MouseButton1Click:Connect(function()
-    Window:Toggle()
+MobileButton.Active = true
+MobileButton.Parent = gui
+
+-- แต่งมุมโค้ง + เส้นขอบ + เงา
+local UICorner = MobileButton:FindFirstChildOfClass("UICorner") or Instance.new("UICorner", MobileButton)
+UICorner.CornerRadius = UDim.new(0, 12)
+
+local UIStroke = MobileButton:FindFirstChildOfClass("UIStroke") or Instance.new("UIStroke", MobileButton)
+UIStroke.Thickness = 2
+UIStroke.Color = Color3.fromRGB(255, 255, 255)
+UIStroke.Transparency = 0.15
+
+local Shadow = MobileButton:FindFirstChild("DropShadow") or Instance.new("Frame")
+Shadow.Name = "DropShadow"
+Shadow.Size = UDim2.new(1, 12, 1, 12)
+Shadow.Position = UDim2.new(0, -6, 0, -2)
+Shadow.BackgroundTransparency = 1
+Shadow.ZIndex = MobileButton.ZIndex - 1
+Shadow.Parent = MobileButton
+
+local ShadowImg = Shadow:FindFirstChildOfClass("ImageLabel") or Instance.new("ImageLabel", Shadow)
+ShadowImg.Name = "ShadowImage"
+ShadowImg.Size = UDim2.new(1, 0, 1, 0)
+ShadowImg.Position = UDim2.new(0, 0, 0, 0)
+ShadowImg.BackgroundTransparency = 1
+ShadowImg.Image = "rbxassetid://5028857084" -- soft shadow
+ShadowImg.ImageTransparency = 0.35
+ShadowImg.ScaleType = Enum.ScaleType.Slice
+ShadowImg.SliceCenter = Rect.new(24, 24, 276, 276)
+
+-- ======= DRAG LOGIC (รองรับเมาส์และทัช) =======
+local dragging = false
+local dragStart, startPos
+local lastInputObject
+
+local function clampToScreen(posUDim2)
+    -- กันปุ่มลอยออกนอกจอ
+    local vp = workspace.CurrentCamera and workspace.CurrentCamera.ViewportSize or Vector2.new(1920,1080)
+    local px = posUDim2.X.Offset
+    local py = posUDim2.Y.Offset
+    local bw = MobileButton.AbsoluteSize.X
+    local bh = MobileButton.AbsoluteSize.Y
+
+    px = math.clamp(px, 0, math.max(0, vp.X - bw))
+    py = math.clamp(py, 0, math.max(0, vp.Y - bh))
+
+    return UDim2.new(0, px, 0, py)
+end
+
+local function updateDrag(input)
+    if not dragging then return end
+    local delta = input.Position - dragStart
+    MobileButton.Position = clampToScreen(UDim2.new(0, startPos.X + delta.X, 0, startPos.Y + delta.Y))
+end
+
+MobileButton.InputBegan:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseButton1
+    or input.UserInputType == Enum.UserInputType.Touch then
+        dragging = true
+        lastInputObject = input
+        dragStart = input.Position
+        startPos = Vector2.new(MobileButton.AbsolutePosition.X, MobileButton.AbsolutePosition.Y)
+        input.Changed:Connect(function()
+            if input.UserInputState == Enum.UserInputState.End then
+                dragging = false
+            end
+        end)
+    end
 end)
+
+MobileButton.InputChanged:Connect(function(input)
+    if input.UserInputType == Enum.UserInputType.MouseMovement
+    or input.UserInputType == Enum.UserInputType.Touch then
+        lastInputObject = input
+    end
+end)
+
+UIS.InputChanged:Connect(function(input)
+    if input == lastInputObject then
+        updateDrag(input)
+    end
+end)
+
+-- ======= DOUBLE TAP = เปลี่ยนขนาด S/M/L =======
+local lastTapTime = 0
+local doubleTapWindow = 0.25 -- วินาที
+
+local function cycleSize()
+    sizeIndex = sizeIndex % #sizeOrder + 1
+    MobileButton.Size = sizes[sizeOrder[sizeIndex]]
+    -- clamp อีกรอบกันปุ่มหลุดขอบหลังเปลี่ยนขนาด
+    MobileButton.Position = clampToScreen(MobileButton.Position)
+end
+
+-- แตะ/คลิก: toggle Rayfield (กดครั้งเดียว), ดับเบิลแตะ: เปลี่ยนขนาด
+MobileButton.MouseButton1Click:Connect(function()
+    local now = tick()
+    if now - lastTapTime <= doubleTapWindow then
+        -- Double tap => Resize
+        cycleSize()
+        lastTapTime = 0
+        return
+    end
+    lastTapTime = now
+
+    -- Single tap => Toggle Window
+    if Window and Window.Toggle then
+        Window:Toggle()
+    else
+        warn("Rayfield Window ยังไม่พร้อม หรือไม่มีเมธอด Toggle")
+    end
+end)
+
+-- ป้องกันลากแล้วหลุดขอบเวลาเปลี่ยนจอ/หมุนจอ
+workspace:GetPropertyChangedSignal("CurrentCamera"):Connect(function()
+    task.defer(function()
+        if workspace.CurrentCamera then
+            MobileButton.Position = clampToScreen(MobileButton.Position)
+        end
+    end)
+end)
+RunService.RenderStepped:Connect(function()
+    -- เผื่อ viewport เปลี่ยนแบบ runtime
+    MobileButton.Position = clampToScreen(MobileButton.Position)
+end)
+
+
+
+
+
+
+
+
+
+
+
 
 -- ตัวแปรระบบ
 local Players = game:GetService("Players")
@@ -300,9 +473,6 @@ creditTab2:CreateLabel("original script by dion_ktl")
 creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมัส)")
 creditTab2:CreateLabel("อัพเดต 31/10/2025")
 creditTab2:CreateLabel("Discord: dSyCsRpU62")
-
--- === เคาท์ดาวน์ปีใหม่ ===
-local newYearTab = Window:CreateTab("เคาท์ดาวน์ปีใหม่")
 
 -- === ลูปหลัก ===
 RS.RenderStepped:Connect(function()
