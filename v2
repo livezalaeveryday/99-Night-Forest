@@ -96,23 +96,6 @@ MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = 
 MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
 local noclipToggle = MainTab:CreateToggle({Name="เปิด/ปิด Noclip", CurrentValue=false, Flag="NoclipToggle", Callback=function(val) noclipEnabled=val end})
--- ===== ปุ่ม “ลากศพทั้งหมด” (ไม่ใช้ dropdown) =====
-MainTab:CreateButton({
-    Name = "ดึงศพเพื่อน",
-    Callback = function()
-        -- เตรียมตัวเรา
-        local char = player.Character or player.CharacterAdded:Wait()
-        local hrp = char:WaitForChild("HumanoidRootPart")
-
-        -- เตรียม RemoteEvents
-        local remoteEvents = ReplicatedStorage:FindFirstChild("RemoteEvents")
-        local startDragging = remoteEvents and remoteEvents:FindFirstChild("RequestStartDraggingItem")
-        local stopDragging  = remoteEvents and remoteEvents:FindFirstChild("StopDraggingItem")
-
-        if not (startDragging and stopDragging) then
-            Rayfield:Notify({Title = "ผิดพลาด", Content = "ไม่พบ RemoteEvent ลากศพ", Duration = 5})
-            return
-        end
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
