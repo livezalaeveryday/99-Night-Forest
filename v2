@@ -274,11 +274,11 @@ end)
 
 
 -- === แท็บใหม่: วาปสถานที่ ===
-local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) -- ไอคอนแผนที่
+local tpTab = Window:CreateTab("วาป")
 
 -- ตารางพิกัด (key = ชื่อจริงในโค้ด, value = พิกัด + ชื่อที่โชว์ในปุ่ม)
 local Locations = {
-    Terrain     = { CFrame = CFrame.new(0, 50, 0),   Display = "กองไฟ!!!" },
+    Terrain     = { CFrame = CFrame.new(0, 50, 0),   Display = "กองไฟ" },
     -- เพิ่มกี่ที่ก็ได้ตรงนี้
 }
 
