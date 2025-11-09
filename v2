@@ -101,52 +101,14 @@ end
 local MainTab = Window:CreateTab("ตัวละคร", 6026568198)
 
 MainTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
+MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
+MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
+MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
 local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,150}, Increment=1, Suffix=" Speed", CurrentValue=50, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
 local speedToggle = MainTab:CreateToggle({Name="เปิด/ปิด วิ่งเร็ว", CurrentValue=false, Flag="SpeedToggle", Callback=toggleSpeed})
 local speedSlider = MainTab:CreateSlider({Name="ความเร็ววิ่ง", Range={1,150}, Increment=1, Suffix=" Speed", CurrentValue=32, Flag="RunSpeed", Callback=function(val) runSpeed=val if superSpeed then humanoid.WalkSpeed=runSpeed end end})
 local noclipToggle = MainTab:CreateToggle({Name="เปิด/ปิด Noclip", CurrentValue=false, Flag="NoclipToggle", Callback=function(val) noclipEnabled=val end})
-local infJumpToggle = MainTab:CreateToggle({Name="เปิด/ปิด Infinite Jump", CurrentValue=false, Flag="InfJumpToggle", Callback=function(val) infJumpEnabled=val end})
-
--- === ลบหมอกถาวร ===
-local OriginalFogEnd = game:GetService("Lighting").FogEnd
-local OriginalFogStart = game:GetService("Lighting").FogStart
-local FogLoopConnection = nil
-
-local ToggleFog = MainTab:CreateToggle({
-    Name = "ลบหมอก (ถาวร)",
-    CurrentValue = false,
-    Flag = "ToggleFog",
-    Callback = function(val)
-        local Lighting = game:GetService("Lighting")
-        if val then
-            if OriginalFogEnd == nil then OriginalFogEnd = Lighting.FogEnd end
-            if OriginalFogStart == nil then OriginalFogStart = Lighting.FogStart end
-            if FogLoopConnection then FogLoopConnection:Disconnect() end
-            FogLoopConnection = RS.Heartbeat:Connect(function()
-                if not ToggleFog.CurrentValue then return end
-                Lighting.FogEnd = 1000
-                Lighting.FogStart = 1000
-            end)
-            Lighting.FogEnd = 1000
-            Lighting.FogStart = 1000
-            Rayfield:Notify({Title = "ลบหมอก", Content = "หมอกหายถาวร!", Duration = 3})
-        else
-            if FogLoopConnection then FogLoopConnection:Disconnect() FogLoopConnection = nil end
-            Lighting.FogEnd = OriginalFogEnd or 100000
-            Lighting.FogStart = OriginalFogStart or 0
-            Rayfield:Notify({Title = "ลบหมอก", Content = "หมอกกลับมาแล้ว", Duration = 3})
-        end
-    end
-})
-
--- รองรับ Load Config
-task.spawn(function()
-    task.wait(1)
-    if ToggleFog.CurrentValue then
-        ToggleFog.Callback(true)
-    end
-end)
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
@@ -202,6 +164,15 @@ local friendDropdown = friendTab:CreateDropdown({
     Options = getPlayerList(),
     CurrentOption = {},
     Flag = "FriendSelect"
+})
+
+-- ปุ่มรีเฟรชรายชื่อ (มีผลเฉพาะ dropdown วาปเพื่อน)
+friendTab:CreateButton({
+    Name = "รีเฟรชรายชื่อ",
+    Callback = function()
+        friendDropdown:Set(getPlayerList())
+        Rayfield:Notify({Title = "อัปเดตแล้ว", Content = "รีเฟรชรายชื่อสำเร็จ", Duration = 3})
+    end
 })
 
 -- ปุ่มวาปไปหาเพื่อน (ใช้ dropdown)
@@ -306,15 +277,6 @@ friendTab:CreateButton({
     end
 })
 
--- ปุ่มรีเฟรชรายชื่อ (มีผลเฉพาะ dropdown วาปเพื่อน)
-friendTab:CreateButton({
-    Name = "รีเฟรชรายชื่อ",
-    Callback = function()
-        friendDropdown:Set(getPlayerList())
-        Rayfield:Notify({Title = "อัปเดตแล้ว", Content = "รีเฟรชรายชื่อสำเร็จ", Duration = 3})
-    end
-})
-
 -- อัปเดต Dropdown อัตโนมัติ เมื่อมีคนเข้า/ออก (เฉพาะวาปเพื่อน)
 Players.PlayerAdded:Connect(function()
     friendDropdown:Set(getPlayerList())
@@ -325,9 +287,6 @@ end)
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("God Mode+ดึงของ", 6031280882)
-extraTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
-extraTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
-extraTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 
