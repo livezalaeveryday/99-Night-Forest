@@ -278,7 +278,7 @@ local tpTab = Window:CreateTab("วาปสถานที่", 13014647359) --
 
 -- ตารางพิกัด (key = ชื่อจริงในโค้ด, value = พิกัด + ชื่อที่โชว์ในปุ่ม)
 local Locations = {
-    Terrain     = { CFrame = CFrame.new(0, 50, 0),   Display = "" },
+    Terrain     = { CFrame = CFrame.new(0, 50, 0),   Display = "กองไฟ" },
     -- เพิ่มกี่ที่ก็ได้ตรงนี้
 }
 
@@ -304,13 +304,6 @@ for key, data in pairs(Locations) do
         end
     })
 end
-
--- ถ้าอยากมีปุ่มใหญ่ ๆ ด่วนด้านบนสุด (เช่น Terrain ที่คนใช้บ่อยสุด)
-tpTab:CreateButton({
-    Name = "Terrain หลัก (ทางลัด)",
-    Callback = function()
-        teleportTo(Locations.Terrain)
-    end
 })
 
 -- === แท็บสคริปต์เพิ่มเติม ===
