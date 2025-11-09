@@ -98,7 +98,7 @@ local function toggleSpeed(on)
 end
 
 -- === แท็บตัวละคร ===
-local MainTab = Window:CreateTab("ตัวละคร", 6026568198)
+local MainTab = Window:CreateTab("ตัวละคร")
 
 MainTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
 MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
@@ -115,7 +115,7 @@ local Workspace = game:GetService("Workspace")
 local player = Players.LocalPlayer
 
 -- สร้างแท็บ
-local friendTab = Window:CreateTab("วาป", 6026568198)
+local friendTab = Window:CreateTab("วาป")
 
 -- ===== Helpers =====
 local function getPlayerList()
@@ -283,18 +283,18 @@ Players.PlayerRemoving:Connect(function()
 end)
 
 -- === แท็บสคริปต์เพิ่มเติม ===
-local extraTab = Window:CreateTab("Script ค่ายอื่นๆ", 6031280882)
+local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 
 -- === แท็บอัพเดต & เครดิต ===
-local updateTab = Window:CreateTab("รายการอัพเดต", 6034989579)
+local updateTab = Window:CreateTab("รายการอัพเดต")
 updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
 updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
 updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
 updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
 
-local creditTab2 = Window:CreateTab("เครดิต", 6034989579)
+local creditTab2 = Window:CreateTab("เครดิต")
 creditTab2:CreateLabel("owner by livezala")
 creditTab2:CreateLabel("original script by dion_ktl")
 creditTab2:CreateLabel("พัฒนาต่อโดย thomas (โทมัส)")
@@ -302,22 +302,7 @@ creditTab2:CreateLabel("อัพเดต 31/10/2025")
 creditTab2:CreateLabel("Discord: dSyCsRpU62")
 
 -- === เคาท์ดาวน์ปีใหม่ ===
-local newYearTab = Window:CreateTab("เคาท์ดาวน์ปีใหม่", 6034979821)
-local countdownLabel = newYearTab:CreateLabel("กำลังโหลดเคาท์ดาวน์...")
-local targetTime = os.time({year=2026, month=1, day=1, hour=0, min=0, sec=0})
-local countdownConnection = RS.RenderStepped:Connect(function()
-    local diff = targetTime - os.time()
-    if diff <= 0 then
-        countdownLabel:Set("Happy New Year!")
-        countdownConnection:Disconnect()
-        return
-    end
-    local d = math.floor(diff / 86400)
-    local h = math.floor((diff % 86400) / 3600)
-    local m = math.floor((diff % 3600) / 60)
-    local s = diff % 60
-    countdownLabel:Set(string.format("%02d:%02d:%02d:%02d", d, h, m, s))
-end)
+local newYearTab = Window:CreateTab("เคาท์ดาวน์ปีใหม่")
 
 -- === ลูปหลัก ===
 RS.RenderStepped:Connect(function()
