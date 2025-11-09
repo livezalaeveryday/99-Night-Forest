@@ -96,6 +96,62 @@ MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = 
 MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
 local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,200}, Increment=200, Suffix=" Speed", CurrentValue=200, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
+-- ปุ่มปิดหมอกถาวร (เพิ่มในแท็บตัวละคร หรือแท็บใหม่)
+MainTab:CreateButton({
+    Name = "🔥 ปิดหมอกถาวร",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        
+        -- ตั้งค่า Fog ให้หายไป (visibility 100000 studs)
+        Lighting.FogEnd = 100000
+        Lighting.FogStart = 0  -- เริ่มหมอกไกลสุด
+        
+        -- ลบ Atmosphere ถ้ามี (จะ disable fog อัตโนมัติ)
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("Atmosphere") then
+                v:Destroy()
+            end
+        end
+        
+        -- ป้องกันเกมเซ็ตค่ากลับ (ถาวร 100%)
+        Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+            Lighting.FogEnd = 100000
+        end)
+        Lighting.DescendantAdded:Connect(function(v)
+            if v:IsA("Atmosphere") then
+                v:Destroy()
+            end
+        end)
+        
+        Rayfield:Notify({
+            Title = "ปิดหมอกสำเร็จ! 🔥",
+            Content = "มองเห็นไกลสุดขีด ถาวรไม่กลับมา",
+            Duration = 4
+        })
+    end
+})
+
+-- Toggle เปิด/ปิดหมอก (โบนัส)
+local fogToggle = MainTab:CreateToggle({
+    Name = "เปิด/ปิด หมอก",
+    CurrentValue = false,
+    Flag = "FogToggle",
+    Callback = function(val)
+        local Lighting = game:GetService("Lighting")
+        if val then
+            -- เปิดหมอก (ค่าเดิมของเกม)
+            Lighting.FogEnd = 1000  -- ปรับตามเกม
+            Lighting.FogStart = 50
+        else
+            -- ปิดหมอก
+            Lighting.FogEnd = 100000
+            Lighting.FogStart = 0
+            for _, v in pairs(Lighting:GetDescendants()) do
+                if v:IsA("Atmosphere") then v:Destroy() end
+            end
+        end
+    end
+})
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
