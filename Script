@@ -89,14 +89,13 @@ end
 
 -- === แท็บตัวละคร ===
 local MainTab = Window:CreateTab("ใช้บ่อย")
-MainTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
+MainTab:CreateButton({Name = "ไม่มีวันตาย", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
 MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
 MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
 MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
 MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
-local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,200}, Increment=200, Suffix=" Speed", CurrentValue=200, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
--- ปุ่มปิดหมอกถาวร (เพิ่มในแท็บตัวละคร หรือแท็บใหม่)
+
 MainTab:CreateButton({
     Name = "🔥 ปิดหมอกถาวร",
     Callback = function()
@@ -130,8 +129,6 @@ MainTab:CreateButton({
         })
     end
 })
-
--- Toggle เปิด/ปิดหมอก (โบนัส)
 local fogToggle = MainTab:CreateToggle({
     Name = "เปิด/ปิด หมอก",
     CurrentValue = false,
@@ -152,6 +149,7 @@ local fogToggle = MainTab:CreateToggle({
         end
     end
 })
+
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
@@ -310,62 +308,124 @@ friendTab:CreateButton({
     end
 })
 
--- ปุ่มรีเฟรชรายชื่อ (มีผลเฉพาะ dropdown วาปเพื่อน)
-friendTab:CreateButton({
-    Name = "รีเฟรชรายชื่อ",
-    Callback = function()
-        friendDropdown:Set(getPlayerList())
-        Rayfield:Notify({Title = "อัปเดตแล้ว", Content = "รีเฟรชรายชื่อสำเร็จ", Duration = 3})
-    end
-})
+-- แทนที่ส่วน tpTab เดิมทั้งหมดด้วยโค้ดนี้ (เริ่มจาก local tpTab = ...)
 
--- อัปเดต Dropdown อัตโนมัติ เมื่อมีคนเข้า/ออก (เฉพาะวาปเพื่อน)
-Players.PlayerAdded:Connect(function()
-    friendDropdown:Set(getPlayerList())
-end)
-Players.PlayerRemoving:Connect(function()
-    friendDropdown:Set(getPlayerList())
-end)
-
--- === แท็บใหม่: วาปสถานที่ ===
+-- === แท็บวาปสถานที่ ===
 local tpTab = Window:CreateTab("วาปไปที่ต่างๆ")
 
--- ตารางพิกัด (key = ชื่อในโค้ด, value = พิกัด + ชื่อปุ่มสวย ๆ)
-local Locations = {
-    Terrain     = { CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0),       Display = "แคมป์ไฟ (จุดเกิด)" },
-    -- เพิ่มกี่ที่ก็ได้ตรงนี้
+-- 🔥 AUTO-GENERATE Locations จาก Map/Landmarks (รันครั้งเดียว)
+local Locations = {}
+local folder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Landmarks")
+
+-- ชื่อไทยอัตโนมัติ
+local thaiNames = {
+    StrongHold = "ปราสาทเพชร",
+    Fairy_House = "บ้านนางฟ้า", 
+    Ice_Temple = "วิหารน้ำแข็ง",
+    Jail_Cellar1 = "ห้องขังใต้ดิน 1",
+    Jail_Cellar2 = "ห้องขังใต้ดิน 2", 
+    Jail_Cellar3 = "ห้องขังใต้ดิน 3",
+    Jail_Cellar4 = "ห้องขังใต้ดิน 4",
+    SkillsBuilding = "อาคารฝึกสกิล",
+    Snow_Clothing_Shop = "ร้านเสื้อผ้าหิมะ",
+    ToolWorkshop = "โรงงานเครื่องมือ"
 }
 
--- ฟังก์ชันวาป (ใช้ซ้ำทุกปุ่ม)
+-- ดึงพิกัดจริงจากเกม (ถ้ามี)
+if folder then
+    for _, landmark in pairs(folder:GetChildren()) do
+        local name = landmark.Name
+        local cf
+        
+        if landmark:IsA("Model") then
+            if landmark.PrimaryPart then
+                cf = landmark.PrimaryPart.CFrame
+            else
+                for _, part in pairs(landmark:GetChildren()) do
+                    if part:IsA("BasePart") then
+                        cf = part.CFrame
+                        break
+                    end
+                end
+            end
+        elseif landmark:IsA("BasePart") then
+            cf = landmark.CFrame
+        end
+        
+        if cf then
+            local pos = cf.Position
+            local displayName = thaiNames[name] or name:gsub("_", " ")
+            Locations[name] = {
+                CFrame = CFrame.new(pos.X, pos.Y, pos.Z),
+                Display = displayName
+            }
+        end
+    end
+end
+
+-- ฟังก์ชันวาป
 local function teleportTo(data)
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
     hrp.CFrame = data.CFrame
     Rayfield:Notify({
-        Title = "วาปสำเร็จ!",
-        Content = "ไป "..data.Display.." แล้ว",
+        Title = "วาปสำเร็จ! 🚀",
+        Content = "ไป " .. data.Display .. " แล้ว",
         Duration = 3,
         Image = 13014647359
     })
 end
 
--- === สร้างปุ่มอัตโนมัติจากตาราง Locations (แก้จุดผิดพลาดตรงนี้) ===
+-- 🔥 สร้างปุ่มอัตโนมัติทุกสถานที่
 for key, data in pairs(Locations) do
     tpTab:CreateButton({
-        Name = data.Display,
+        Name = "📍 " .. data.Display,
         Callback = function()
             teleportTo(data)
         end
     })
-end -- <<< อย่าลืม end ตรงนี้!!!
+end
+
+-- ปุ่มโบนัส: รีเฟรชพิกัด (อัพเดท Locations ใหม่)
+tpTab:CreateButton({
+    Name = "🔄 รีเฟรชพิกัดทั้งหมด",
+    Callback = function()
+        -- รีโหลด Locations ใหม่
+        Locations = {}
+        local folder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Landmarks")
+        if folder then
+            for _, landmark in pairs(folder:GetChildren()) do
+                -- ... (โค้ดดึง cf เดียวกับด้านบน)
+                local name = landmark.Name
+                local cf = landmark.PrimaryPart and landmark.PrimaryPart.CFrame or 
+                          (landmark:IsA("BasePart") and landmark.CFrame) or nil
+                if cf then
+                    local pos = cf.Position
+                    local displayName = thaiNames[name] or name:gsub("_", " ")
+                    Locations[name] = { CFrame = CFrame.new(pos.X, pos.Y, pos.Z), Display = displayName }
+                end
+            end
+        end
+        Rayfield:Notify({
+            Title = "รีเฟรชสำเร็จ!",
+            Content = "อัพเดท " .. (#Locations) .. " สถานที่",
+            Duration = 3
+        })
+    end
+})
+
+-- แสดงจำนวนสถานที่
+tpTab:CreateLabel("📍 พบสถานที่: " .. (#Locations) .. " ที่")
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
+extraTab:CreateButton({Name = "Infinity Yild", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))() end})
 
 -- === แท็บอัพเดต ===
 local updateTab = Window:CreateTab("รายการอัพเดต")
+updateTab:CreateLabel("v2.0 - Telaport")
 updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
 updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
 updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
