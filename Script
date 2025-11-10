@@ -151,6 +151,224 @@ local fogToggle = MainTab:CreateToggle({
 })
 
 
+-- === แท็บ Kill Aura สุดโหด (15 อาวุธ + Attack Speed) ===
+local killAuraTab = Window:CreateTab("⚔️ Kill Aura")
+
+-- ตัวแปร Kill Aura
+local killAuraEnabled = false
+local killAuraRange = 150
+local killAuraCount = 0
+local killAuraHitDelay = 0  -- Delay เริ่มต้น (ยิ่งน้อย = ตีเร็ว)
+local Characters = Workspace:WaitForChild("Characters")
+
+-- รายการอาวุธทั้งหมด (15 ชิ้น)
+local allWeapons = {
+    "Spear", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
+    "Trident", "Poison Spear", "Infernal Sword", "Cultist King Mace",
+    "Obsidiron Hammer", "Scythe", "Vampire Scythe", "Axe", "Good Axe"
+}
+
+-- ฟังก์ชันหา Weapon (Priority)
+local function getWeapon()
+    if not player:FindFirstChild("Inventory") then return nil end
+    
+    local priorityWeapons = {"Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear"}
+    local normalWeapons = {"Katana", "Spear", "Trident", "Scythe", "Morningstar", "Axe", "Cultist King Mace", "Obsidiron Hammer"}
+    
+    for _, weaponName in ipairs(priorityWeapons) do
+        local weapon = player.Inventory:FindFirstChild(weaponName)
+        if weapon then return weapon end
+    end
+    
+    for _, weaponName in ipairs(normalWeapons) do
+        local weapon = player.Inventory:FindFirstChild(weaponName)
+        if weapon then return weapon end
+    end
+    
+    return nil
+end
+
+-- ฟังก์ชันส่งดาเมจ
+local function damage(target, tool)
+    if not tool then return end
+    local remoteEvents = ReplicatedStorage:FindFirstChild("RemoteEvents")
+    if not remoteEvents then return end
+    local evt = remoteEvents:FindFirstChild("ToolDamageObject")
+    if not evt then return end
+    
+    local hrp = target:FindFirstChild("HumanoidRootPart")
+    local cf = hrp and hrp.CFrame or CFrame.new()
+    
+    evt:InvokeServer(target, tool, tostring(killAuraCount).."_7367831688", cf)
+end
+
+-- Toggle Kill Aura
+killAuraTab:CreateToggle({
+    Name = "🔥 เปิด/ปิด Kill Aura",
+    CurrentValue = false,
+    Flag = "KillAuraToggle",
+    Callback = function(bool)
+        killAuraEnabled = bool
+        Rayfield:Notify({
+            Title = "Kill Aura",
+            Content = bool and "⚔️ เปิด - ตีเร็วสุด!" or "❌ ปิดแล้ว",
+            Duration = 3,
+            Image = 6026568198
+        })
+    end,
+})
+
+-- **🚀 SLIDER ปรับความเร็วตี (ใหม่!)**
+killAuraTab:CreateSlider({
+    Name = "⚡ ความเร็วตี (ต่ำ=เร็ว)",
+    Range = {0, 0.5},
+    Increment = 0.01,
+    CurrentValue = 0,
+    Flag = "HitSpeedSlider",
+    Callback = function(val)
+        killAuraHitDelay = val
+        Rayfield:Notify({
+            Title = "ปรับความเร็วตี",
+            Content = "Delay: " .. val .. "s (ยิ่งต่ำยิ่งเร็ว)",
+            Duration = 2
+        })
+    end,
+})
+
+-- Dropdown โหมดอาวุธ
+local weaponModes = {"Auto (Priority)", "Good Axe Only", "Vampire Scythe Only", "Laser Sword Only", "All Weapons (Random)"}
+local selectedMode = "Auto (Priority)"
+killAuraTab:CreateDropdown({
+    Name = "โหมดอาวุธ",
+    Options = weaponModes,
+    CurrentOption = {selectedMode},
+    Flag = "WeaponMode",
+    Callback = function(option)
+        selectedMode = option[1]
+    end,
+})
+
+-- Slider ระยะ
+killAuraTab:CreateSlider({
+    Name = "ระยะ Kill Aura (Studs)",
+    Range = {50, 500},
+    Increment = 10,
+    CurrentValue = 150,
+    Flag = "KillAuraRange",
+    Callback = function(val)
+        killAuraRange = val
+    end,
+})
+
+-- Label สถิติ
+local statusLabel = killAuraTab:CreateLabel("Kills: 0 | Range: 150 | Speed: 0.03s | Weapon: Ready")
+
+-- Reset Stats
+killAuraTab:CreateButton({
+    Name = "🔄 Reset Stats",
+    Callback = function()
+        killAuraCount = 0
+        statusLabel:Set("Kills: 0 | Range: " .. killAuraRange .. " | Speed: " .. killAuraHitDelay .. "s | Weapon: Ready")
+    end,
+})
+
+-- ตรวจสอบ Inventory
+killAuraTab:CreateButton({
+    Name = "📋 ตรวจสอบ Inventory (15 อาวุธ)",
+    Callback = function()
+        local inv = player:FindFirstChild("Inventory")
+        if not inv then return Rayfield:Notify({Title="❌ Error", Content="ไม่พบ Inventory", Duration=3}) end
+        
+        local found = 0
+        for _, wName in ipairs(allWeapons) do
+            if inv:FindFirstChild(wName) then found += 1 end
+        end
+        
+        Rayfield:Notify({
+            Title = "Inventory Scan",
+            Content = "พบ " .. found .. "/15 อาวุธ",
+            Duration = 4
+        })
+    end,
+})
+
+killAuraTab:CreateLabel("⚡ ปรับ 'ความเร็วตี' = 0.01 = ตีเร็วสุด!")
+killAuraTab:CreateLabel("⚠️ Private Server เท่านั้น!")
+
+-- === Kill Aura Loop (ปรับ Speed แล้ว) ===
+task.spawn(function()
+    while task.wait() do
+        if not killAuraEnabled then 
+            statusLabel:Set("Kills: " .. killAuraCount .. " | Range: " .. killAuraRange .. " | OFF")
+            task.wait(0.5)  -- ลด load เมื่อปิด
+            continue 
+        end
+        
+        local weapon
+        if selectedMode == "Auto (Priority)" then
+            weapon = getWeapon()
+        elseif selectedMode == "All Weapons (Random)" then
+            local available = {}
+            for _, wName in ipairs(allWeapons) do
+                local w = player.Inventory:FindFirstChild(wName)
+                if w then table.insert(available, w) end
+            end
+            if #available > 0 then weapon = available[math.random(1, #available)] end
+        else
+            local targetName = selectedMode:match("Only") and selectedMode:gsub(" Only", "")
+            weapon = player.Inventory:FindFirstChild(targetName)
+        end
+        
+        local myChar = player.Character
+        if not myChar or not myChar:FindFirstChild("HumanoidRootPart") or not weapon then 
+            statusLabel:Set("Kills: " .. killAuraCount .. " | ❌ ไม่พบอาวุธ")
+            continue 
+        end
+        
+        local myHRP = myChar.HumanoidRootPart
+        statusLabel:Set("Kills: " .. killAuraCount .. " | Range: " .. killAuraRange .. " | Speed: " .. killAuraHitDelay .. "s | " .. weapon.Name)
+        
+        -- Loop ตี (ใช้ delay ใหม่)
+        for _, v in ipairs(Characters:GetChildren()) do
+            if v:IsA("Model") and v ~= myChar and v:FindFirstChild("HumanoidRootPart") and not v.Name:find(" Body") then
+                local dist = (v.HumanoidRootPart.Position - myHRP.Position).Magnitude
+                if dist <= killAuraRange then
+                    killAuraCount += 1
+                    damage(v, weapon)
+                    statusLabel:Set("Kills: " .. killAuraCount .. " | ⚔️ ATTACKING")
+                    task.wait(killAuraHitDelay)  -- <<<< ที่นี่! ปรับความเร็วตี
+                end
+            end
+        end
+    end
+end)
+
+-- Auto Equip
+killAuraTab:CreateToggle({
+    Name = "🔧 Auto Equip",
+    CurrentValue = false,
+    Flag = "AutoEquip",
+    Callback = function(bool)
+        task.spawn(function()
+            while bool do
+                task.wait(0.5)
+                local weapon = getWeapon()
+                if weapon and player.Character then
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid then humanoid:EquipTool(weapon) end
+                end
+            end
+        end)
+    end,
+})
+
+Rayfield:Notify({
+    Title = "✅ เพิ่ม Attack Speed!",
+    Content = "ปรับ '⚡ ความเร็วตี' ในเมนูได้เลย (0.01=เร็วสุด)",
+    Duration = 5,
+    Image = 6026568198
+})
+
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
