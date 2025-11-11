@@ -8,7 +8,7 @@ local Workspace = cloneref(game:GetService("Workspace"))
 local itemNames = {"Morsel","Morsel?","Steak","Ribs"}
 
 local offsetDistance = 1
-local delayBetweenItems = 0 -- เร็วจี๊ด
+local delayBetweenItems = 1 -- เร็วจี๊ด
 
 -- ====== เตรียมตัวละคร ======
 local player = Players.LocalPlayer
@@ -51,7 +51,7 @@ end
 -- ====== ลากทุกไอเทมที่ชื่ออยู่ในลิสต์ ======
 local function dragAllItemsToPlayer()
 local hrpCFrame = workspace.Map.Campground.MainFire.Center.CFrame
-local targetPosition = (hrpCFrame * CFrame.new(0, 100, -offsetDistance)).Position
+local targetPosition = (hrpCFrame * CFrame.new(0, 5, -offsetDistance)).Position
 local children = itemsFolder:GetChildren()
 local itemsToDrag = {}
  
