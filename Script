@@ -851,6 +851,97 @@ player.CharacterAdded:Connect(function(char)
     hrp = character:WaitForChild("HumanoidRootPart")
 end)
 
+-- ==============================
+-- STRONGHOLD COUNTDOWN แบบเรียบง่าย + แก้กระตุก
+-- ==============================
+
+local StrongholdTab = Window:CreateTab("Stronghold")
+
+local LevelColors = {
+    Color3.fromRGB(195, 255, 0), Color3.fromRGB(255, 238, 0),
+    Color3.fromRGB(255, 157, 0), Color3.fromRGB(255, 64, 0),
+    Color3.fromRGB(255, 0, 0)
+}
+
+local StatusLabel = StrongholdTab:CreateLabel("กำลังค้นหา Stronghold...")
+
+-- ตัวแปรเก็บข้อมูลล่าสุด (ลดการค้นหาซ้ำ)
+local LastStronghold = nil
+local LastUpdateTime = 0
+local UPDATE_INTERVAL = 1  -- อัพเดททุก 1 วินาที
+
+-- ฟังก์ชันอัพเดท (เรียบง่าย + ไม่กระตุก)
+local function UpdateStronghold()
+    local now = tick()
+    if now - LastUpdateTime < UPDATE_INTERVAL then return end
+    LastUpdateTime = now
+
+    local sh = nil
+
+    -- ใช้ตัวเดิมถ้ายังอยู่
+    if LastStronghold and LastStronghold.Parent and LastStronghold:FindFirstChild("Functional") then
+        sh = LastStronghold
+    else
+        -- ค้นหาใหม่ (แค่ครั้งเดียวเมื่อหาย)
+        for _, obj in pairs(Workspace:GetDescendants()) do
+            if obj:IsA("Model") and obj:HasTag("Stronghold") and obj.Name ~= "AlienMothership" and obj:FindFirstChild("Functional") then
+                sh = obj
+                LastStronghold = sh
+                break
+            end
+        end
+    end
+
+    if not sh then
+        StatusLabel:Set("ไม่พบ Stronghold")
+        LastStronghold = nil
+        return
+    end
+
+    local func = sh.Functional
+    local openTime = func:GetAttribute("OpenTime")
+    local level = func:GetAttribute("Level") or 1
+    local timeLeft = openTime and (openTime - Workspace:GetServerTimeNow()) or 0
+
+    local timeStr = "00:00"
+    local status = "รอเปิด"
+
+    if timeLeft <= 0 then
+        timeStr = "เปิดแล้ว!"
+        status = "พร้อมเข้า"
+    else
+        if timeLeft <= 60 then
+            timeStr = string.format("%02i วินาที", timeLeft % 60)
+        else
+            timeStr = string.format("%02i นาที %02i วินาที", math.floor(timeLeft / 60) % 60, timeLeft % 60)
+        end
+    end
+
+    StatusLabel:Set(string.format(
+        "Stronghold\nระดับ: %d\n%s\nเหลือ: %s",
+        level, status, timeStr
+    ))
+
+    -- แจ้งเตือนเมื่อเปิด (ครั้งเดียว)
+    if timeLeft <= 0 and not sh.Notified then
+        sh.Notified = true
+        Rayfield:Notify({
+            Title = "STRONGHOLD เปิดแล้ว!",
+            Content = "ระดับ " .. level .. " พร้อมเข้าเลย!",
+            Duration = 8,
+            Image = 4483362458
+        })
+    end
+end
+
+-- ลูปอัพเดทเบา ๆ (ไม่ใช้ task.wait ใน loop หนัก)
+game:GetService("RunService").Heartbeat:Connect(function()
+    pcall(UpdateStronghold)
+end)
+
+-- รันครั้งแรก
+UpdateStronghold()
+
 -- === เครดิต ===
 local creditTab2 = Window:CreateTab("เครดิต")
 creditTab2:CreateLabel("owner by livezala")
@@ -903,7 +994,7 @@ player.CharacterAdded:Connect(function(c)
     toggleSpeed(false)
     noclipEnabled = false
     infJumpEnabled = false
-    Rayfield:LoadConfiguration()
+    Rayfield:LoadConfiguration()า
 end)
 
 Rayfield:Notify({Title="โหลดสำเร็จ!", Content="พร้อมลุย ไลฟ์สาระ ไปวันๆ!", Duration=4, Image=6026568198})
