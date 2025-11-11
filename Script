@@ -94,7 +94,27 @@ MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = func
 MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
 MainTab:CreateButton({Name = "เติมอาหาร", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/food"))() end})
 MainTab:CreateButton({Name = "เติมยา", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
-MainTab:CreateButton({Name = "เติมเครื่องบด", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
+MainTab:CreateToggle({
+    Name = "เติมเครื่องบด (Stack)",
+    CurrentValue = false,
+    Flag = "IronStackToggle",
+    Callback = function(val)
+        if val then
+            ironTask = task.spawn(function()
+                while task.wait(1) do
+                    loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))()
+                end
+            end)
+            Rayfield:Notify({Title = "เปิดแล้ว", Content = "เติมเครื่องบดต่อเนื่อง...", Duration = 2})
+        else
+            if ironTask then
+                task.cancel(ironTask)
+                ironTask = nil
+            end
+            Rayfield:Notify({Title = "ปิดแล้ว", Content = "หยุดเติมเครื่องบด", Duration = 2})
+        end
+    end
+})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
 
 MainTab:CreateButton({
@@ -670,14 +690,6 @@ local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 extraTab:CreateButton({Name = "Infinity Yild", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))() end})
-
--- === แท็บอัพเดต ===
-local updateTab = Window:CreateTab("รายการอัพเดต")
-updateTab:CreateLabel("v2.0 - Telaport")
-updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
-updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
-updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
-updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
 
 -- === เครดิต ===
 local creditTab2 = Window:CreateTab("เครดิต")
