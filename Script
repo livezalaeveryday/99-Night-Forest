@@ -199,17 +199,17 @@ local Characters = Workspace:WaitForChild("Characters")
 
 -- รายการอาวุธทั้งหมด (15 ชิ้น)
 local allWeapons = {
-    "Old Axe", "Spear","Infernal Sword", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
+    "Spear","Infernal Sword", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
     "Trident", "Poison Spear", "Infernal Sword", "Cultist King Mace",
-    "Obsidiron Hammer", "Scythe", "Vampire Scythe", "Strong Axe", "Good Axe"
+    "Obsidiron Hammer", "Scythe", "Vampire Scythe", "Axe", "Strong Axe", "Good Axe"
 }
 
 -- ฟังก์ชันหา Weapon (Priority)
 local function getWeapon()
     if not player:FindFirstChild("Inventory") then return nil end
     
-    local priorityWeapons = {"Old Axe", "Infernal Sword","Strong Axe","Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear"}
-    local normalWeapons = {"Katana", "Spear", "Trident", "Scythe", "Morningstar", "Cultist King Mace", "Obsidiron Hammer"}
+    local priorityWeapons = {"Infernal Sword","Strong Axe","Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear"}
+    local normalWeapons = {"Katana", "Spear", "Trident", "Scythe", "Morningstar", "Axe", "Cultist King Mace", "Obsidiron Hammer"}
     
     for _, weaponName in ipairs(priorityWeapons) do
         local weapon = player.Inventory:FindFirstChild(weaponName)
@@ -404,6 +404,164 @@ Rayfield:Notify({
     Duration = 5,
     Image = 6026568198
 })
+
+-- === Drag Items (EZ) + Quantity ===
+local cloneref = cloneref or function(x) return x end
+
+-- Services & refs
+local Players = cloneref(game:GetService("Players"))
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+local Workspace = cloneref(game:GetService("Workspace"))
+local RunService = game:GetService("RunService")
+
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+local itemsFolder = Workspace:WaitForChild("Items")
+local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem")
+local stopDragging  = remoteEvents:WaitForChild("StopDraggingItem")
+
+-- ตั้งค่า
+local offsetDistance = 2        -- วางของไว้หน้าตัวละครกี่สตู
+local perItemDelay   = 0        -- หน่วงต่อชิ้น (วิ) ถ้าอยากจี๊ดๆ ใส่ 0
+
+-- helper: Rayfield dropdown บางเวอร์ชันคืน table
+local function asString(opt)
+    if type(opt) == "table" then return tostring(opt[1]) end
+    return tostring(opt)
+end
+
+-- รวบรวมชื่อทุกไอเทม เรียง A→Z
+local function getSortedItemNames()
+    local seen = {}
+    for _, it in ipairs(itemsFolder:GetChildren()) do
+        if it and it.Name then seen[it.Name] = true end
+    end
+    local names = {}
+    for n in pairs(seen) do table.insert(names, n) end
+    table.sort(names, function(a,b) return string.lower(a) < string.lower(b) end)
+    if #names == 0 then names = {"(ไม่มีไอเทมใน Items)"} end
+    return names
+end
+
+-- หา “หลายชิ้น” ตามชื่อ (หยิบได้สูงสุด maxCount)
+local function findItemsByName(name, maxCount)
+    local list = {}
+    for _, it in ipairs(itemsFolder:GetChildren()) do
+        if it.Name == name then
+            table.insert(list, it)
+            if #list >= maxCount then break end
+        end
+    end
+    return list
+end
+
+-- ลากของ 1 ชิ้นมาหน้าเรา
+local function dragOne(item)
+    if not (item and item.Parent) then return false end
+    local cloned = cloneref(item)
+    startDragging:FireServer(cloned)
+    RunService.Heartbeat:Wait() -- เผื่อให้สถานะลากเซิร์ฟเวอร์เซ็ตทัน
+
+    local pos = (hrp.CFrame * CFrame.new(0, 0, -offsetDistance)).Position
+    task.spawn(function()
+        if cloned:IsA("BasePart") then
+            cloned.CFrame = CFrame.new(pos)
+        elseif cloned:IsA("Model") and cloned.PrimaryPart then
+            cloned:SetPrimaryPartCFrame(CFrame.new(pos))
+        end
+    end)
+
+    task.wait(0.05)
+    stopDragging:FireServer(cloned)
+    return true
+end
+
+-- ===== UI =====
+local tab = Window:CreateTab("Drag Items (EZ)", 0)
+
+-- Dropdown รายชื่อ
+local options  = getSortedItemNames()
+local selected = asString(options[1])
+if selected == "(ไม่มีไอเทมใน Items)" then selected = nil end
+
+local dropdown = tab:CreateDropdown({
+    Name = "เลือกไอเทม (ทั้งหมด เรียง A→Z)",
+    Options = options,
+    CurrentOption = options[1],
+    Multiple = false,
+    Callback = function(opt)
+        selected = asString(opt)
+        if selected == "(ไม่มีไอเทมใน Items)" then selected = nil end
+    end
+})
+
+-- ปุ่มรีเฟรชรายชื่อ
+tab:CreateButton({
+    Name = "รีเฟรชรายชื่อ",
+    Callback = function()
+        options = getSortedItemNames()
+        dropdown:Set(options)
+        selected = asString(options[1])
+        if selected == "(ไม่มีไอเทมใน Items)" then selected = nil end
+        Rayfield:Notify({Title="อัปเดตแล้ว", Content="รีเฟรชรายการสำเร็จ", Duration=2})
+    end
+})
+
+-- สไลเดอร์จำนวน
+local qtySlider = tab:CreateSlider({
+    Name = "จำนวนที่จะดึง",
+    Range = {1, 50},     -- ปรับเพดานได้ตามใจ
+    Increment = 1,
+    CurrentValue = 1,
+    Callback = function() end
+})
+
+-- (ตัวเลือกเสริม) ดีเลย์ต่อชิ้น
+tab:CreateSlider({
+    Name = "ดีเลย์ต่อชิ้น (วิ)",
+    Range = {0, 1},
+    Increment = 0.05,
+    CurrentValue = perItemDelay,
+    Callback = function(v) perItemDelay = v end
+})
+
+-- ปุ่มดึงตามจำนวน
+tab:CreateButton({
+    Name = "ดึงตามจำนวน",
+    Callback = function()
+        if not selected then
+            Rayfield:Notify({Title="ยังไม่มีของ", Content="กรุณาเลือกไอเทมก่อน", Duration=2})
+            return
+        end
+        local want = qtySlider.CurrentValue or 1
+        local targets = findItemsByName(selected, want)
+        if #targets == 0 then
+            Rayfield:Notify({Title="ไม่พบ", Content="ไม่มี "..selected.." ให้ดึง", Duration=2})
+            return
+        end
+
+        local dragged = 0
+        for _, it in ipairs(targets) do
+            if dragOne(it) then dragged += 1 end
+            if perItemDelay > 0 then task.wait(perItemDelay) end
+        end
+
+        Rayfield:Notify({
+            Title="สำเร็จ",
+            Content="ดึง "..selected.." มาแล้ว "..tostring(dragged).." ชิ้น",
+            Duration=3
+        })
+    end
+})
+
+-- อัปเดต HRP เมื่อรีสปอน
+player.CharacterAdded:Connect(function(char)
+    character = char
+    hrp = character:WaitForChild("HumanoidRootPart")
+end)
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
@@ -690,6 +848,14 @@ local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
 extraTab:CreateButton({Name = "Infinity Yild", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))() end})
+
+-- === แท็บอัพเดต ===
+local updateTab = Window:CreateTab("รายการอัพเดต")
+updateTab:CreateLabel("v2.0 - Telaport")
+updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
+updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
+updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
+updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
 
 -- === เครดิต ===
 local creditTab2 = Window:CreateTab("เครดิต")
