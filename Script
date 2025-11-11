@@ -90,7 +90,7 @@ end
 -- === แท็บตัวละคร ===
 local MainTab = Window:CreateTab("ใช้บ่อย")
 MainTab:CreateButton({Name = "ไม่มีวันตาย", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
-MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
+MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 0, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
 MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
 MainTab:CreateButton({Name = "เติมอาหาร", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/food"))() end})
 MainTab:CreateButton({Name = "เติมยา", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
@@ -130,27 +130,6 @@ MainTab:CreateButton({
         })
     end
 })
-local fogToggle = MainTab:CreateToggle({
-    Name = "เปิด/ปิด หมอก",
-    CurrentValue = false,
-    Flag = "FogToggle",
-    Callback = function(val)
-        local Lighting = game:GetService("Lighting")
-        if val then
-            -- เปิดหมอก (ค่าเดิมของเกม)
-            Lighting.FogEnd = 1000  -- ปรับตามเกม
-            Lighting.FogStart = 50
-        else
-            -- ปิดหมอก
-            Lighting.FogEnd = 100000
-            Lighting.FogStart = 0
-            for _, v in pairs(Lighting:GetDescendants()) do
-                if v:IsA("Atmosphere") then v:Destroy() end
-            end
-        end
-    end
-})
-
 
 -- === แท็บ Kill Aura สุดโหด (15 อาวุธ + Attack Speed) ===
 local killAuraTab = Window:CreateTab("⚔️ Kill Aura")
@@ -164,7 +143,7 @@ local Characters = Workspace:WaitForChild("Characters")
 
 -- รายการอาวุธทั้งหมด (15 ชิ้น)
 local allWeapons = {
-    "Spear", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
+    "Spear","Infernal Sword", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
     "Trident", "Poison Spear", "Infernal Sword", "Cultist King Mace",
     "Obsidiron Hammer", "Scythe", "Vampire Scythe", "Axe", "Strong Axe", "Good Axe"
 }
@@ -173,7 +152,7 @@ local allWeapons = {
 local function getWeapon()
     if not player:FindFirstChild("Inventory") then return nil end
     
-    local priorityWeapons = {"Strong Axe","Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear"}
+    local priorityWeapons = {"Infernal Sword","Strong Axe","Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear"}
     local normalWeapons = {"Katana", "Spear", "Trident", "Scythe", "Morningstar", "Axe", "Cultist King Mace", "Obsidiron Hammer"}
     
     for _, weaponName in ipairs(priorityWeapons) do
