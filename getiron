@@ -9,7 +9,7 @@ local itemNames = {"Log", "Bolt", "Sheet Metal", "UFO Junk", "UFO Component", "B
 local delayBetweenItems = 0 -- เร็วจี๊ด
 
 -- ====== พิกัดเป้าหมาย (เพิ่ม Y +15 เพื่อให้ลากลงได้ดี) ======
-local TARGET_POSITION = Vector3.new(20.953277587890625, 1.200000286102295 + 100, -5.237123012542725)
+local TARGET_POSITION = Vector3.new(20.953277587890625, 1.200000286102295 + 0, -5.237123012542725)
 
 -- ====== เตรียมตัวละคร ======
 local player = Players.LocalPlayer
