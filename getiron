@@ -6,7 +6,7 @@ local Workspace = cloneref(game:GetService("Workspace"))
 -- ====== ตั้งค่า ======
 -- ใส่ชื่อไอเทมได้หลายชิ้น เช่น {"Carrot", "Potato", "Onion"}
 local itemNames = {"Log", "Bolt", "Sheet Metal", "UFO Junk", "UFO Component", "Broken Fan", "Old Radio", "Broken Microwave", "Tyre", "Metal Chair", "Old Car Engine", "Washing Machine", "Cultist Experiment", "Cultist Prototype", "UFO Scrap"}
-local delayBetweenItems = 0.1 -- เร็วจี๊ด
+local delayBetweenItems = 0.5 -- เร็วจี๊ด
 
 -- ====== พิกัดเป้าหมาย (เพิ่ม Y +15 เพื่อให้ลากลงได้ดี) ======
 local TARGET_POSITION = Vector3.new(20.953277587890625, 1.200000286102295 + 100, -5.237123012542725)
