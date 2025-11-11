@@ -151,39 +151,42 @@ MainTab:CreateButton({
     end
 })
 
-MainTab:CreateToggle({
-    Name = "🛡️ Anti-AFK (ป้องกันหลุด)",
-    CurrentValue = false,
-    Flag = "AntiAFK",
-    Callback = function(enabled)
-        if enabled then
-            -- เริ่ม Anti-AFK Loop
-            spawn(function()
-                while Rayfield.Flags.AntiAFK.CurrentValue do
-                    -- วิธี 1: ซิมคุณู่น MouseMove (ปลอดภัยที่สุด)
-                    mousemoveabs(math.random(0, 1920), math.random(0, 1080), 0)
-                    task.wait(math.random(5, 15) * 60) -- รอสุ่ม 5-15 นาที (คล้ายมนุษย์)
-                    
-                    -- วิธี 2: กด W สุ่ม (เคลื่อนที่ตัวละคร - ถ้าต้องการ)
-                    -- keypress(0x57) -- W key
-                    -- task.wait(0.1)
-                    -- keyrelease(0x57)
-                end
-            end)
-            
-            Rayfield:Notify({
-                Title = "🛡️ Anti-AFK เปิด!",
-                Content = "ป้องกันหลุดเมื่อไม่อยู่หน้าจอ (สุ่มทุก 5-15 นาที)",
-                Duration = 4,
-                Image = 6026568198
-            })
-        else
-            Rayfield:Notify({
-                Title = "🛡️ Anti-AFK ปิด",
-                Content = "หยุดป้องกัน - ระวังหลุดถ้า AFK",
-                Duration = 3
-            })
+-- === ปุ่ม Anti-Idle (ใหม่) ===
+MainTab:CreateButton({
+    Name = "🛡️ Anti-Idle (ป้องกัน AFK)",
+    Callback = function()
+        -- สร้าง VirtualUser เพื่อจำลองการเคลื่อนไหว
+        local VirtualUser = game:GetService("VirtualUser")
+        local player = game.Players.LocalPlayer
+        
+        -- ฟังก์ชันจำลองการกดปุ่ม
+        local function simulateInput()
+            VirtualUser:CaptureController()
+            VirtualUser:ClickButton2(Vector2.new()) -- จำลองคลิกขวา
         end
+        
+        -- เริ่มลูปจำลองทุก 30 วินาที
+        local antiIdleConnection
+        antiIdleConnection = game:GetService("RunService").Heartbeat:Connect(function()
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                pcall(simulateInput)
+            end
+        end)
+        
+        -- ป้องกันการถูกเตะเมื่อไม่เคลื่อนไหว
+        player.Idled:Connect(function()
+            simulateInput()
+        end)
+        
+        Rayfield:Notify({
+            Title = "เปิด Anti-Idle แล้ว! 🛡️",
+            Content = "ป้องกันการถูกเตะเมื่อ AFK (ทำงานตลอด)",
+            Duration = 5,
+            Image = 6026568198
+        })
+        
+        -- คำสั่งหยุดเมื่อกดปุ่มอีกครั้ง (ถ้าต้องการปิด)
+        -- (ในที่นี้ใช้เป็นการเปิดครั้งเดียว ไม่มีปุ่มปิด เพื่อความง่าย)
     end
 })
 
