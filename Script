@@ -151,45 +151,6 @@ MainTab:CreateButton({
     end
 })
 
--- === ปุ่ม Anti-Idle (ใหม่) ===
-MainTab:CreateButton({
-    Name = "🛡️ Anti-Idle (ป้องกัน AFK)",
-    Callback = function()
-        -- สร้าง VirtualUser เพื่อจำลองการเคลื่อนไหว
-        local VirtualUser = game:GetService("VirtualUser")
-        local player = game.Players.LocalPlayer
-        
-        -- ฟังก์ชันจำลองการกดปุ่ม
-        local function simulateInput()
-            VirtualUser:CaptureController()
-            VirtualUser:ClickButton2(Vector2.new()) -- จำลองคลิกขวา
-        end
-        
-        -- เริ่มลูปจำลองทุก 30 วินาที
-        local antiIdleConnection
-        antiIdleConnection = game:GetService("RunService").Heartbeat:Connect(function()
-            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
-                pcall(simulateInput)
-            end
-        end)
-        
-        -- ป้องกันการถูกเตะเมื่อไม่เคลื่อนไหว
-        player.Idled:Connect(function()
-            simulateInput()
-        end)
-        
-        Rayfield:Notify({
-            Title = "เปิด Anti-Idle แล้ว! 🛡️",
-            Content = "ป้องกันการถูกเตะเมื่อ AFK (ทำงานตลอด)",
-            Duration = 5,
-            Image = 6026568198
-        })
-        
-        -- คำสั่งหยุดเมื่อกดปุ่มอีกครั้ง (ถ้าต้องการปิด)
-        -- (ในที่นี้ใช้เป็นการเปิดครั้งเดียว ไม่มีปุ่มปิด เพื่อความง่าย)
-    end
-})
-
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
