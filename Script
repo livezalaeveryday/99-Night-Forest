@@ -544,7 +544,13 @@ local tpTab = Window:CreateTab("วาปไปที่ต่างๆ")
 local currentButtons = {}
 local locationLabel
 
--- ชื่อไทย
+-- ประกาศ player ก่อนใช้
+local player = game.Players.LocalPlayer
+
+-- เก็บ Locations ไว้นอกฟังก์ชัน (สำคัญมาก!)
+local Locations = {}
+
+-- ชื่อภาษาไทย
 local thaiNames = {
     StrongHold = "ปราสาทเพชร",
     Fairy_House = "บ้านนางฟ้า", 
@@ -558,7 +564,7 @@ local thaiNames = {
     ToolWorkshop = "โรงงานเครื่องมือ"
 }
 
--- ฟังก์ชันดึงพิกัดจาก landmark
+-- ฟังก์ชันดึง CFrame จาก landmark
 local function getCFrameFromLandmark(landmark)
     if landmark:IsA("Model") then
         if landmark.PrimaryPart then
@@ -576,15 +582,17 @@ local function getCFrameFromLandmark(landmark)
     return nil
 end
 
--- ฟังก์ชันสร้างปุ่มทั้งหมดใหม่
+-- ฟังก์ชันรีเฟรชสถานที่
 local function refreshLocations()
     -- ลบปุ่มเก่า
     for _, btn in pairs(currentButtons) do
         if btn.Remove then btn:Remove() end
     end
     currentButtons = {}
-    
+
+    -- รีเซ็ต Locations
     Locations = {}
+
     local folder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Landmarks")
     
     if folder then
@@ -631,13 +639,6 @@ local function refreshLocations()
         Content = "พบ " .. #Locations .. " สถานที่",
         Duration = 4
     })
-end
-
--- ฟังก์ชันวาป (ไม่ใช้แล้ว แต่เก็บไว้เผื่อ)
-local function teleportTo(data)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.CFrame = data.CFrame
 end
 
 -- ปุ่มรีเฟรช
