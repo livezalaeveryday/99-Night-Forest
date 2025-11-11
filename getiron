@@ -1,4 +1,4 @@
--- เสี่ยโอนไวโหมด: ลากได้หลายชื่อไอเทม
+-- เสี่ยโอนไวโหมด: ลากได้หลายชื่อไอเทม ลงพิกัดที่กำหนด
 local Players = cloneref(game:GetService("Players"))
 local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
 local Workspace = cloneref(game:GetService("Workspace"))
@@ -6,9 +6,10 @@ local Workspace = cloneref(game:GetService("Workspace"))
 -- ====== ตั้งค่า ======
 -- ใส่ชื่อไอเทมได้หลายชิ้น เช่น {"Carrot", "Potato", "Onion"}
 local itemNames = {"Log", "Bolt", "Sheet Metal", "UFO Junk", "UFO Component", "Broken Fan", "Old Radio", "Broken Microwave", "Tyre", "Metal Chair", "Old Car Engine", "Washing Machine", "Cultist Experiment", "Cultist Prototype", "UFO Scrap"}
+local delayBetweenItems = 0.1 -- เร็วจี๊ด
 
-local offsetDistance = 0
-local delayBetweenItems = 0 -- เร็วจี๊ด
+-- ====== พิกัดเป้าหมาย (เพิ่ม Y +15 เพื่อให้ลากลงได้ดี) ======
+local TARGET_POSITION = Vector3.new(20.953277587890625, 1.200000286102295 + 100, -5.237123012542725)
 
 -- ====== เตรียมตัวละคร ======
 local player = Players.LocalPlayer
@@ -35,7 +36,7 @@ end
 local function dragItemToPosition(itemToDrag, position)
     local clonedItem = cloneref(itemToDrag)
     startDragging:FireServer(clonedItem)
-
+    
     task.spawn(function()
         if clonedItem:IsA("BasePart") then
             clonedItem.CFrame = CFrame.new(position)
@@ -43,33 +44,34 @@ local function dragItemToPosition(itemToDrag, position)
             clonedItem:SetPrimaryPartCFrame(CFrame.new(position))
         end
     end)
-
+    
     task.wait(0.05)
     stopDragging:FireServer(clonedItem)
 end
 
--- ====== ลากทุกไอเทมที่ชื่ออยู่ในลิสต์ ======
-local function dragAllItemsToPlayer()
-    local hrpCFrame = humanoidRootPart.CFrame
-    local targetPosition = (hrpCFrame * CFrame.new(0, 0, -offsetDistance)).Position
-
+-- ====== ลากทุกไอเทมลงพิกัดที่กำหนด ======
+local function dragAllItemsToTarget()
+    print("🎯 พิกัดเป้าหมาย:", TARGET_POSITION)
+    
     local children = itemsFolder:GetChildren()
     local itemsToDrag = {}
-
+    
     for _, item in ipairs(children) do
         if isTargetItem(item.Name) then
             table.insert(itemsToDrag, item)
         end
     end
-
-    print("Found " .. #itemsToDrag .. " items to drag")
-
-    for _, item in ipairs(itemsToDrag) do
-        dragItemToPosition(item, targetPosition)
+    
+    print("🔍 พบ " .. #itemsToDrag .. " ไอเทมที่จะลาก")
+    
+    for i, item in ipairs(itemsToDrag) do
+        print("ลากไอเทมที่ " .. i .. ": " .. item.Name)
+        dragItemToPosition(item, TARGET_POSITION)
         task.wait(delayBetweenItems)
     end
-
-    print("Finished!")
+    
+    print("🎉 เสร็จแล้ว! ลากทั้งหมด " .. #itemsToDrag .. " ชิ้นลงพิกัดเรียบร้อย!")
 end
 
-dragAllItemsToPlayer()
+-- รันเลย!
+dragAllItemsToTarget()
