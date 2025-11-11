@@ -131,6 +131,42 @@ MainTab:CreateButton({
     end
 })
 
+MainTab:CreateToggle({
+    Name = "🛡️ Anti-AFK (ป้องกันหลุด)",
+    CurrentValue = false,
+    Flag = "AntiAFK",
+    Callback = function(enabled)
+        if enabled then
+            -- เริ่ม Anti-AFK Loop
+            spawn(function()
+                while Rayfield.Flags.AntiAFK.CurrentValue do
+                    -- วิธี 1: ซิมคุณู่น MouseMove (ปลอดภัยที่สุด)
+                    mousemoveabs(math.random(0, 1920), math.random(0, 1080), 0)
+                    task.wait(math.random(5, 15) * 60) -- รอสุ่ม 5-15 นาที (คล้ายมนุษย์)
+                    
+                    -- วิธี 2: กด W สุ่ม (เคลื่อนที่ตัวละคร - ถ้าต้องการ)
+                    -- keypress(0x57) -- W key
+                    -- task.wait(0.1)
+                    -- keyrelease(0x57)
+                end
+            end)
+            
+            Rayfield:Notify({
+                Title = "🛡️ Anti-AFK เปิด!",
+                Content = "ป้องกันหลุดเมื่อไม่อยู่หน้าจอ (สุ่มทุก 5-15 นาที)",
+                Duration = 4,
+                Image = 6026568198
+            })
+        else
+            Rayfield:Notify({
+                Title = "🛡️ Anti-AFK ปิด",
+                Content = "หยุดป้องกัน - ระวังหลุดถ้า AFK",
+                Duration = 3
+            })
+        end
+    end
+})
+
 -- === แท็บ Kill Aura สุดโหด (15 อาวุธ + Attack Speed) ===
 local killAuraTab = Window:CreateTab("⚔️ Kill Aura")
 
