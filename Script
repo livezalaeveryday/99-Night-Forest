@@ -166,14 +166,14 @@ local Characters = Workspace:WaitForChild("Characters")
 local allWeapons = {
     "Spear", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
     "Trident", "Poison Spear", "Infernal Sword", "Cultist King Mace",
-    "Obsidiron Hammer", "Scythe", "Vampire Scythe", "Axe", "Good Axe"
+    "Obsidiron Hammer", "Scythe", "Vampire Scythe", "Axe", "Strong Axe", "Good Axe"
 }
 
 -- ฟังก์ชันหา Weapon (Priority)
 local function getWeapon()
     if not player:FindFirstChild("Inventory") then return nil end
     
-    local priorityWeapons = {"Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear"}
+    local priorityWeapons = {"Strong Axe","Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear"}
     local normalWeapons = {"Katana", "Spear", "Trident", "Scythe", "Morningstar", "Axe", "Cultist King Mace", "Obsidiron Hammer"}
     
     for _, weaponName in ipairs(priorityWeapons) do
@@ -537,16 +537,14 @@ friendTab:CreateButton({
 })
 
 
--- แทนที่ส่วน tpTab เดิมทั้งหมดด้วยโค้ดนี้ (เริ่มจาก local tpTab = ...)
-
 -- === แท็บวาปสถานที่ ===
 local tpTab = Window:CreateTab("วาปไปที่ต่างๆ")
 
--- 🔥 AUTO-GENERATE Locations จาก Map/Landmarks (รันครั้งเดียว)
-local Locations = {}
-local folder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Landmarks")
+-- ตัวแปรเก็บปุ่มเพื่อลบตอนรีเฟรช
+local currentButtons = {}
+local locationLabel
 
--- ชื่อไทยอัตโนมัติ
+-- ชื่อไทย
 local thaiNames = {
     StrongHold = "ปราสาทเพชร",
     Fairy_House = "บ้านนางฟ้า", 
@@ -560,91 +558,96 @@ local thaiNames = {
     ToolWorkshop = "โรงงานเครื่องมือ"
 }
 
--- ดึงพิกัดจริงจากเกม (ถ้ามี)
-if folder then
-    for _, landmark in pairs(folder:GetChildren()) do
-        local name = landmark.Name
-        local cf
-        
-        if landmark:IsA("Model") then
-            if landmark.PrimaryPart then
-                cf = landmark.PrimaryPart.CFrame
-            else
-                for _, part in pairs(landmark:GetChildren()) do
-                    if part:IsA("BasePart") then
-                        cf = part.CFrame
-                        break
-                    end
+-- ฟังก์ชันดึงพิกัดจาก landmark
+local function getCFrameFromLandmark(landmark)
+    if landmark:IsA("Model") then
+        if landmark.PrimaryPart then
+            return landmark.PrimaryPart.CFrame
+        else
+            for _, part in pairs(landmark:GetChildren()) do
+                if part:IsA("BasePart") then
+                    return part.CFrame
                 end
             end
-        elseif landmark:IsA("BasePart") then
-            cf = landmark.CFrame
         end
-        
-        if cf then
-            local pos = cf.Position
-            local displayName = thaiNames[name] or name:gsub("_", " ")
-            Locations[name] = {
-                CFrame = CFrame.new(pos.X, pos.Y, pos.Z),
-                Display = displayName
-            }
-        end
+    elseif landmark:IsA("BasePart") then
+        return landmark.CFrame
     end
+    return nil
 end
 
--- ฟังก์ชันวาป
+-- ฟังก์ชันสร้างปุ่มทั้งหมดใหม่
+local function refreshLocations()
+    -- ลบปุ่มเก่า
+    for _, btn in pairs(currentButtons) do
+        if btn.Remove then btn:Remove() end
+    end
+    currentButtons = {}
+    
+    Locations = {}
+    local folder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Landmarks")
+    
+    if folder then
+        for _, landmark in pairs(folder:GetChildren()) do
+            local name = landmark.Name
+            local cf = getCFrameFromLandmark(landmark)
+            
+            if cf then
+                local pos = cf.Position
+                local displayName = thaiNames[name] or name:gsub("_", " ")
+                Locations[name] = {
+                    CFrame = CFrame.new(pos.X, pos.Y + 3, pos.Z), -- +3 เพื่อไม่ติดพื้น
+                    Display = displayName
+                }
+            end
+        end
+    end
+    
+    -- สร้างปุ่มใหม่
+    for key, data in pairs(Locations) do
+        local btn = tpTab:CreateButton({
+            Name = "📍 " .. data.Display,
+            Callback = function()
+                local char = player.Character or player.CharacterAdded:Wait()
+                local hrp = char:WaitForChild("HumanoidRootPart")
+                hrp.CFrame = data.CFrame
+                Rayfield:Notify({
+                    Title = "วาปสำเร็จ! 🚀",
+                    Content = "ไป " .. data.Display .. " แล้ว",
+                    Duration = 3,
+                    Image = 13014647359
+                })
+            end
+        })
+        table.insert(currentButtons, btn)
+    end
+    
+    -- อัพเดท Label
+    if locationLabel then locationLabel:Remove() end
+    locationLabel = tpTab:CreateLabel("📍 พบสถานที่: " .. #Locations .. " ที่")
+    
+    Rayfield:Notify({
+        Title = "รีเฟรชสำเร็จ!",
+        Content = "พบ " .. #Locations .. " สถานที่",
+        Duration = 4
+    })
+end
+
+-- ฟังก์ชันวาป (ไม่ใช้แล้ว แต่เก็บไว้เผื่อ)
 local function teleportTo(data)
     local char = player.Character or player.CharacterAdded:Wait()
     local hrp = char:WaitForChild("HumanoidRootPart")
     hrp.CFrame = data.CFrame
-    Rayfield:Notify({
-        Title = "วาปสำเร็จ! 🚀",
-        Content = "ไป " .. data.Display .. " แล้ว",
-        Duration = 3,
-        Image = 13014647359
-    })
 end
 
--- 🔥 สร้างปุ่มอัตโนมัติทุกสถานที่
-for key, data in pairs(Locations) do
-    tpTab:CreateButton({
-        Name = "📍 " .. data.Display,
-        Callback = function()
-            teleportTo(data)
-        end
-    })
-end
-
--- ปุ่มโบนัส: รีเฟรชพิกัด (อัพเดท Locations ใหม่)
+-- ปุ่มรีเฟรช
 tpTab:CreateButton({
     Name = "🔄 รีเฟรชพิกัดทั้งหมด",
-    Callback = function()
-        -- รีโหลด Locations ใหม่
-        Locations = {}
-        local folder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Landmarks")
-        if folder then
-            for _, landmark in pairs(folder:GetChildren()) do
-                -- ... (โค้ดดึง cf เดียวกับด้านบน)
-                local name = landmark.Name
-                local cf = landmark.PrimaryPart and landmark.PrimaryPart.CFrame or 
-                          (landmark:IsA("BasePart") and landmark.CFrame) or nil
-                if cf then
-                    local pos = cf.Position
-                    local displayName = thaiNames[name] or name:gsub("_", " ")
-                    Locations[name] = { CFrame = CFrame.new(pos.X, pos.Y, pos.Z), Display = displayName }
-                end
-            end
-        end
-        Rayfield:Notify({
-            Title = "รีเฟรชสำเร็จ!",
-            Content = "อัพเดท " .. (#Locations) .. " สถานที่",
-            Duration = 3
-        })
-    end
+    Callback = refreshLocations
 })
 
--- แสดงจำนวนสถานที่
-tpTab:CreateLabel("📍 พบสถานที่: " .. (#Locations) .. " ที่")
+-- รันครั้งแรกตอนเปิดสคริปต์
+refreshLocations()
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
