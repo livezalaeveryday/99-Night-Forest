@@ -480,7 +480,7 @@ local function dragOne(item)
 end
 
 -- ===== UI =====
-local tab = Window:CreateTab("Drag Items (EZ)", 0)
+local tab = Window:CreateTab("ดึงของเข้าตัว", 0)
 
 -- Dropdown รายชื่อ
 local options  = getSortedItemNames()
