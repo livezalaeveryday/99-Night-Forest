@@ -994,7 +994,7 @@ player.CharacterAdded:Connect(function(c)
     toggleSpeed(false)
     noclipEnabled = false
     infJumpEnabled = false
-    Rayfield:LoadConfiguration()า
+    Rayfield:LoadConfiguration()
 end)
 
 Rayfield:Notify({Title="โหลดสำเร็จ!", Content="พร้อมลุย ไลฟ์สาระ ไปวันๆ!", Duration=4, Image=6026568198})
