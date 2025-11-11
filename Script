@@ -527,6 +527,16 @@ friendTab:CreateButton({
     end
 })
 
+-- ปุ่มรีเฟรชรายชื่อ (มีผลเฉพาะ dropdown วาปเพื่อน)
+friendTab:CreateButton({
+    Name = "รีเฟรชรายชื่อ",
+    Callback = function()
+        friendDropdown:Set(getPlayerList())
+        Rayfield:Notify({Title = "อัปเดตแล้ว", Content = "รีเฟรชรายชื่อสำเร็จ", Duration = 3})
+    end
+})
+
+
 -- แทนที่ส่วน tpTab เดิมทั้งหมดด้วยโค้ดนี้ (เริ่มจาก local tpTab = ...)
 
 -- === แท็บวาปสถานที่ ===
