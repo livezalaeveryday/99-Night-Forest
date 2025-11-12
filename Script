@@ -94,27 +94,7 @@ MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = func
 MainTab:CreateButton({Name = "เติมไฟ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมไฟเรียบร้อย",Duration = 3})end})
 MainTab:CreateButton({Name = "เติมอาหาร",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/food"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมอาหารเรียบร้อย",Duration = 3})end})
 MainTab:CreateButton({Name = "เติมยา",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมอาหารเรียบร้อย",Duration = 3})end})
-MainTab:CreateToggle({
-    Name = "เติมเครื่องบด (Stack)",
-    CurrentValue = false,
-    Flag = "IronStackToggle",
-    Callback = function(val)
-        if val then
-            ironTask = task.spawn(function()
-                while task.wait(1) do
-                    loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))()
-                end
-            end)
-            Rayfield:Notify({Title = "เปิดแล้ว", Content = "เติมเครื่องบดต่อเนื่อง...", Duration = 2})
-        else
-            if ironTask then
-                task.cancel(ironTask)
-                ironTask = nil
-            end
-            Rayfield:Notify({Title = "ปิดแล้ว", Content = "หยุดเติมเครื่องบด", Duration = 2})
-        end
-    end
-})
+MainTab:CreateButton({Name = "เติมเครื่องบด",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เครื่องบด",Duration = 3})end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
 
 MainTab:CreateButton({
