@@ -89,14 +89,13 @@ end
 
 -- === แท็บตัวละคร ===
 local MainTab = Window:CreateTab("ใช้บ่อย")
-MainTab:CreateButton({Name = "ไม่มีวันตาย",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "Godmode Active",Duration = 3})end})
+MainTab:CreateButton({Name = "อมตะ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "Godmode Active",Duration = 3})end})
 MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 0, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
 MainTab:CreateButton({Name = "เติมไฟ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมไฟเรียบร้อย",Duration = 3})end})
 MainTab:CreateButton({Name = "เติมอาหาร",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/food"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมอาหารเรียบร้อย",Duration = 3})end})
 MainTab:CreateButton({Name = "เติมยา",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมอาหารเรียบร้อย",Duration = 3})end})
 MainTab:CreateButton({Name = "เติมเครื่องบด",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เครื่องบด",Duration = 3})end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
-
 MainTab:CreateButton({
     Name = "🔥 ปิดหมอกถาวร",
     Callback = function()
@@ -401,12 +400,6 @@ tpTab:CreateButton({
 -- รันครั้งแรกตอนเปิดสคริปต์
 refreshLocations()
 
--- === แท็บสคริปต์เพิ่มเติม ===
-local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
-extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
-extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
-extraTab:CreateButton({Name = "Infinity Yild", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))() end})
-
 -- ปุ่มรีเฟรชรายชื่อ (มีผลเฉพาะ dropdown วาปเพื่อน)
 friendTab:CreateButton({
     Name = "รีเฟรชรายชื่อ",
@@ -487,7 +480,7 @@ killAuraTab:CreateToggle({
 killAuraTab:CreateSlider({
     Name = "⚡ ความเร็วตี (ต่ำ=เร็ว)",
     Range = {0, 0.5},
-    Increment = 0.01,
+    Increment = 0.1,
     CurrentValue = 0,
     Flag = "HitSpeedSlider",
     Callback = function(val)
@@ -516,9 +509,9 @@ killAuraTab:CreateDropdown({
 -- Slider ระยะ
 killAuraTab:CreateSlider({
     Name = "ระยะ Kill Aura (Studs)",
-    Range = {50, 500},
-    Increment = 10,
-    CurrentValue = 150,
+    Range = {50, 100},
+    Increment = 5,
+    CurrentValue = 100,
     Flag = "KillAuraRange",
     Callback = function(val)
         killAuraRange = val
@@ -556,9 +549,6 @@ killAuraTab:CreateButton({
         })
     end,
 })
-
-killAuraTab:CreateLabel("⚡ ปรับ 'ความเร็วตี' = 0.01 = ตีเร็วสุด!")
-killAuraTab:CreateLabel("⚠️ Private Server เท่านั้น!")
 
 -- === Kill Aura Loop (ปรับ Speed แล้ว) ===
 task.spawn(function()
@@ -882,6 +872,12 @@ end)
 
 -- รันครั้งแรก
 UpdateStronghold()
+
+-- === แท็บสคริปต์เพิ่มเติม ===
+local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
+extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
+extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
+extraTab:CreateButton({Name = "Infinity Yild", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))() end})
 
 -- === เครดิต ===
 local creditTab2 = Window:CreateTab("เครดิต")
