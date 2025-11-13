@@ -51,7 +51,7 @@ end
 -- ====== ลากทุกไอเทมที่ชื่ออยู่ในลิสต์ ======
 local function dragAllItemsToPlayer()
 local hrpCFrame = workspace.Map.Campground.MainFire.Center.CFrame
-local targetPosition = (hrpCFrame * CFrame.new(0, 15, -offsetDistance)).Position
+local targetPosition = (hrpCFrame * CFrame.new(0, 300, -offsetDistance)).Position
 local children = itemsFolder:GetChildren()
 local itemsToDrag = {}
  
