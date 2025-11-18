@@ -1228,6 +1228,57 @@ player.CharacterAdded:Connect(function(char)
     hrp = character:WaitForChild("HumanoidRootPart")
 end)
 
+-- === แท็บใหม่: ฟังก์ชันเสริม ===
+local miscTab = Window:CreateTab("ฟังก์ชันเสริม")
+
+-- 2) Anti Idle / Anti AFK (กันเตะออกเมื่อยืนนิ่งนาน)
+local antiIdleEnabled = false
+local antiIdleConnection
+
+local function startAntiIdle()
+    if antiIdleEnabled then return end
+    antiIdleEnabled = true
+    
+    antiIdleConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if antiIdleEnabled then
+            -- ส่งสัญญาณว่าเรายัง active อยู่ (วิธีที่ Roblox ใช้ตรวจ AFK)
+            pcall(function()
+                game:GetService("VirtualUser"):CaptureController()
+                game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+            end)
+        end
+    end)
+end
+
+local function stopAntiIdle()
+    antiIdleEnabled = false
+    if antiIdleConnection then
+        antiIdleConnection:Disconnect()
+        antiIdleConnection = nil
+    end
+end
+
+miscTab:CreateToggle({
+    Name = "⏰ Anti Idle / Anti AFK",
+    CurrentValue = false,
+    Callback = function(val)
+        if val then
+            startAntiIdle()
+            Rayfield:Notify({Title = "เปิด Anti-AFK", Content = "ไม่เตะออกแน่นอน ⏰", Duration = 4})
+        else
+            stopAntiIdle()
+            Rayfield:Notify({Title = "ปิด Anti-AFK", Content = "ระวังโดนเตะนะ", Duration = 3})
+        end
+    end
+})
+
+-- แจ้งตอนโหลดเสร็จ
+Rayfield:Notify({
+    Title = "เพิ่มฟังก์ชันใหม่!",
+    Content = "ไปที่แท็บ \"ฟังก์ชันเสริม\" เพื่อใช้ Instant Prompt กับ Anti-AFK",
+    Duration = 6,
+    Image = 6026568198
+})
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
