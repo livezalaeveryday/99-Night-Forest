@@ -1422,12 +1422,89 @@ miscTab:CreateToggle({
     end
 })
 
--- แจ้งตอนโหลดเสร็จ
-Rayfield:Notify({
-    Title = "เพิ่มฟังก์ชันใหม่!",
-    Content = "ไปที่แท็บ \"ฟังก์ชันเสริม\" เพื่อใช้ Instant Prompt กับ Anti-AFK",
-    Duration = 6,
-    Image = 6026568198
+-- วางแทนโค้ดเก่าทั้งหมดของ Instant Interact ได้เลย
+local InstantTab = Window:CreateTab("Instant Features", "zap")
+
+local instantInteractEnabled = false
+local originalHoldDurations = {}
+local connections = {}
+
+local function setPrompt(prompt, enabled)
+    if not prompt or not prompt.Parent then return end
+    
+    if enabled then
+        if originalHoldDurations[prompt] == nil then
+            originalHoldDurations[prompt] = prompt.HoldDuration
+        end
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = 50   -- ปรับระยะได้ตามใจ
+        prompt.RequiresLineOfSight = false  -- ไม่ต้องมองเห็นก็กดได้ (โหดสุด)
+    else
+        if originalHoldDurations[prompt] ~= nil then
+            prompt.HoldDuration = originalHoldDurations[prompt]
+            prompt.MaxActivationDistance = 10
+            prompt.RequiresLineOfSight = true
+        end
+    end
+end
+
+local function enableInstant()
+    if connections.enabled then return end
+    
+    -- 1. แก้ไข Prompt ที่มีอยู่แล้วทั้งหมดทันที
+    for _, prompt in ipairs(workspace:GetDescendants()) do
+        if prompt:IsA("ProximityPrompt") then
+            setPrompt(prompt, true)
+        end
+    end
+
+    -- 2. ตรวจจับ Prompt ใหม่ที่เกิดขึ้นในอนาคต (สำคัญมาก!)
+    connections.added = workspace.DescendantAdded:Connect(function(obj)
+        if obj:IsA("ProximityPrompt") and instantInteractEnabled then
+            task.wait() -- รอให้มันสร้างเสร็จก่อน
+            setPrompt(obj, true)
+        end
+    end)
+    
+    connections.enabled = true
+end
+
+local function disableInstant()
+    if not connections.enabled then return end
+    
+    for prompt, _ in pairs(originalHoldDurations) do
+        if prompt and prompt.Parent then
+            setPrompt(prompt, false)
+        end
+    end
+    
+    originalHoldDurations = {}
+    
+    if connections.added then
+        connections.added:Disconnect()
+        connections.added = nil
+    end
+    
+    connections.enabled = false
+end
+
+-- Toggle หลัก
+InstantTab:CreateToggle({
+    Name = "Instant Interact (ลื่นสุด ไม่กระตุก)",
+    CurrentValue = false,
+    Callback = function(state)
+        instantInteractEnabled = state
+        if state then
+            enableInstant()
+        else
+            disableInstant()
+        end
+    end,
+})
+
+InstantTab:CreateParagraph({
+    Title = "Info",
+    Content = "• ไม่กระตุกอีกต่อไป (ใช้ Connection ไม่ใช้ loop)\n• กด E ทุกอย่างทันที + ระยะไกล 50 หน่วย\n• ไม่ต้องมองเห็นก็กดได้\n• รองรับ Chest, Door, Trader, Campfire, เก็บของ ทุกอย่าง"
 })
 
 -- === แท็บสคริปต์เพิ่มเติม ===
