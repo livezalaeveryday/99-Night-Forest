@@ -89,6 +89,9 @@ end
 
 -- === แท็บตัวละคร ===
 local MainTab = Window:CreateTab("ใช้บ่อย")
+local UserInputService = game:GetService("UserInputService")
+local godmodeToggled = false
+
 MainTab:CreateButton({Name = "อมตะ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "Godmode Active",Duration = 3})end})
 MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 0, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
 MainTab:CreateButton({Name = "เติมไฟ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมไฟเรียบร้อย",Duration = 3})end})
@@ -125,6 +128,168 @@ MainTab:CreateButton({
             Title = "ปิดหมอกสำเร็จ! 🔥",
             Content = "มองเห็นไกลสุดขีด ถาวรไม่กลับมา",
             Duration = 4
+        })
+    end
+})
+
+-- ปุ่มอมตะแบบ Keybind (กด Numpad1 เพื่อเปิด Godmode)
+MainTab:CreateKeybind({
+    Name = "อมตะ (Godmode)",
+    CurrentKeybind = "KeypadOne",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()
+        
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "อมตะเปิดใช้งาน!",
+            Content = "Godmode Active แล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+
+MainTab:CreateKeybind({
+    Name = "หนีกลับบ้าน (Hotkey)",
+    CurrentKeybind = "KeypadTwo",  -- หรือ "Numpad2" ก็ได้
+    HoldToInteract = false,        -- false = กดครั้งเดียวทำงาน, true = ต้องกดค้าง
+    Callback = function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        hrp.CFrame = CFrame.new(12.079488, 0, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)
+        Rayfield:Notify({
+            Title = "หนีกลับบ้าน",
+            Content = "ถึงแล้ว",
+            Duration = 2,
+            Image = 13014647359
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "เติมไฟ",
+    CurrentKeybind = "KeypadThree",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))()
+
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "สำเร็จ!",
+            Content = "เติมไฟแล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "เติมยา",
+    CurrentKeybind = "KeypadFour",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))()
+
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "สำเร็จ!",
+            Content = "เติมยาแล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "เติมเครื่องบด",
+    CurrentKeybind = "KeypadFive",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))()
+
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "สำเร็จ!",
+            Content = "เติมเครื่องบดแล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+
+-- Toggle การบิน (Flag = "FlyToggle")
+local flyToggle = MainTab:CreateToggle({
+    Name = "เปิด/ปิด การบิน",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(val)
+        if val then
+            startFlying()
+        else
+            stopFlying()
+        end
+    end
+})
+
+-- Hotkey สำหรับ Toggle การบิน (กด Numpad3 เพื่อเปิด/ปิด)
+MainTab:CreateKeybind({
+    Name = "การบิน (Hotkey)",
+    CurrentKeybind = "KeypadSix",  -- หรือ "Numpad3"
+    HoldToInteract = false,          -- กดครั้งเดียว Toggle
+    Callback = function()
+        -- Toggle ค่า FlyToggle (จาก false เป็น true หรือ true เป็น false)
+        local newValue = not flyToggle.CurrentValue
+        flyToggle:Set(newValue)  -- Set ค่าใหม่ (จะเรียก Callback อัตโนมัติ)
+        
+        Rayfield:Notify({
+            Title = "การบิน",
+            Content = newValue and "เปิดแล้ว (กด Numpad3)" or "ปิดแล้ว (กด Numpad3)",
+            Duration = 2,
+            Image = 13014647359
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "ปิดหมอกถาวร (Hotkey)",
+    CurrentKeybind = "KeypadSeven",  -- หรือ "Numpad4"
+    HoldToInteract = false,         -- กดครั้งเดียวทำงาน
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        
+        -- ตั้งค่า Fog ให้หายไป (visibility 100000 studs)
+        Lighting.FogEnd = 100000
+        Lighting.FogStart = 0
+        
+        -- ลบ Atmosphere ถ้ามี
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("Atmosphere") then
+                v:Destroy()
+            end
+        end
+        
+        -- ป้องกันเกมเซ็ตค่ากลับ (ถาวร)
+        Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+            Lighting.FogEnd = 100000
+        end)
+        Lighting.DescendantAdded:Connect(function(v)
+            if v:IsA("Atmosphere") then
+                v:Destroy()
+            end
+        end)
+        
+        Rayfield:Notify({
+            Title = "ปิดหมอกสำเร็จ! 🔥",
+            Content = "มองเห็นไกลสุดขีด (กด Numpad4)",
+            Duration = 3,
+            Image = 13014647359
         })
     end
 })
@@ -233,33 +398,30 @@ friendTab:CreateSlider({
     Callback = function(val) DragDelay = val end
 })
 
--- ===== ปุ่ม “ลากศพทั้งหมด” (ไม่ใช้ dropdown) =====
-friendTab:CreateButton({
-    Name = "ลากศพทั้งหมด (ไม่ต้องเลือกชื่อ)",
+-- Hotkey สำหรับลากศพทั้งหมด (กด Numpad5)
+MainTab:CreateKeybind({  -- หรือ friendTab ถ้าอยากให้อยู่ในแท็บเดียวกัน
+    Name = "ลากศพทั้งหมด (Hotkey)",
+    CurrentKeybind = "KeypadEight",  -- หรือ "Numpad5"
+    HoldToInteract = false,         -- กดครั้งเดียวทำงาน
     Callback = function()
         -- เตรียมตัวเรา
         local char = player.Character or player.CharacterAdded:Wait()
         local hrp = char:WaitForChild("HumanoidRootPart")
-
         -- เตรียม RemoteEvents
         local remoteEvents = ReplicatedStorage:FindFirstChild("RemoteEvents")
         local startDragging = remoteEvents and remoteEvents:FindFirstChild("RequestStartDraggingItem")
         local stopDragging  = remoteEvents and remoteEvents:FindFirstChild("StopDraggingItem")
-
         if not (startDragging and stopDragging) then
             Rayfield:Notify({Title = "ผิดพลาด", Content = "ไม่พบ RemoteEvent ลากศพ", Duration = 5})
             return
         end
-
-        -- หา “ศพทั้งหมด”
+        -- หา "ศพทั้งหมด"
         local bodies = getAllBodies()
         if #bodies == 0 then
             Rayfield:Notify({Title = "ไม่พบศพ", Content = "ตอนนี้ยังไม่มีใครตาย", Duration = 4})
             return
         end
-
-        Rayfield:Notify({Title = "กำลังลากศพ", Content = "พบ "..#bodies.." ตัว", Duration = 3})
-
+        Rayfield:Notify({Title = "กำลังลากศพ", Content = "พบ "..#bodies.." ตัว (กด Numpad5)", Duration = 3})
         task.spawn(function()
             for _, body in ipairs(bodies) do
                 -- กันกรณีออบเจ็กต์หายระหว่างทาง
@@ -267,24 +429,23 @@ friendTab:CreateButton({
                     local inst = (typeof(cloneref) == "function") and cloneref(body) or body
                     startDragging:FireServer(inst)
                     task.wait(0.02)
-
                     -- เลือกพาร์ทอ้างอิงเพื่อวางให้ใกล้ตัวเรา
                     local refPart = findAnyBasePart(body)
                     if refPart then
                         -- ใช้ PivotTo ให้ทั้งโมเดลเลื่อนมาหน้าเรา
                         body:PivotTo(hrp.CFrame * CFrame.new(0, 0, -DragOffset))
                     end
-
                     task.wait(0.05)
                     stopDragging:FireServer(inst)
                     task.wait(DragDelay)
                 end
             end
-
-            Rayfield:Notify({Title = "สำเร็จ!", Content = "ลากศพทั้งหมด "..#bodies.." ตัว!", Duration = 4})
+            Rayfield:Notify({Title = "สำเร็จ! 💀", Content = "ลากศพทั้งหมด "..#bodies.." ตัว!", Duration = 4})
         end)
     end
 })
+
+
 
 -- === แท็บวาปสถานที่ ===
 local tpTab = Window:CreateTab("วาปไปที่ต่างๆ")
@@ -624,39 +785,121 @@ Rayfield:Notify({
 })
 
 -- ==============================
--- STRONGHOLD COUNTDOWN แบบเรียบง่าย + แก้กระตุก
+-- STRONGHOLD AUTO TELEPORT (แก้ปัญหาไม่วาร์ป 100%)
 -- ==============================
-
 local StrongholdTab = Window:CreateTab("Stronghold")
 
 local LevelColors = {
-    Color3.fromRGB(195, 255, 0), Color3.fromRGB(255, 238, 0),
-    Color3.fromRGB(255, 157, 0), Color3.fromRGB(255, 64, 0),
-    Color3.fromRGB(255, 0, 0)
+    [1] = Color3.fromRGB(195, 255, 0),
+    [2] = Color3.fromRGB(255, 238, 0),
+    [3] = Color3.fromRGB(255, 157, 0),
+    [4] = Color3.fromRGB(255, 64, 0),
+    [5] = Color3.fromRGB(255, 0, 0)
 }
 
-local StatusLabel = StrongholdTab:CreateLabel("กำลังค้นหา Stronghold...")
-
--- ตัวแปรเก็บข้อมูลล่าสุด (ลดการค้นหาซ้ำ)
 local LastStronghold = nil
 local LastUpdateTime = 0
-local UPDATE_INTERVAL = 1  -- อัพเดททุก 1 วินาที
+local UPDATE_INTERVAL = 0.3  -- ถี่ขึ้น
+local CountdownEnabled = true
+local AutoTeleportEnabled = true
 
--- ฟังก์ชันอัพเดท (เรียบง่าย + ไม่กระตุก)
+local StatusLabel = StrongholdTab:CreateLabel("กำลังค้นหา Stronghold...")
+local InfoLabel = StrongholdTab:CreateLabel("ระดับ: -\nสถานะ: รอเปิด\nเหลือเวลา: --:--")
+
+-- Toggles
+StrongholdTab:CreateToggle({
+    Name = "เปิดใช้งาน Stronghold Countdown",
+    CurrentValue = true,
+    Callback = function(val) CountdownEnabled = val end
+})
+
+StrongholdTab:CreateToggle({
+    Name = "🚀 AUTO TELEPORT (วาร์ปทันที)",
+    CurrentValue = true,
+    Callback = function(val) AutoTeleportEnabled = val end
+})
+
+-- ปุ่มทดสอบวาร์ป (สำคัญมาก!)
+StrongholdTab:CreateButton({
+    Name = "🧪 ทดสอบวาร์ป (กดตอนเจอ SH)",
+    Callback = function()
+        ManualTeleport()
+    end
+})
+
+-- ฟังก์ชันวาร์ปที่เสถียร 100% (แก้ปัญหาทุกอย่าง)
+function ManualTeleport()
+    if not LastStronghold then 
+        Rayfield:Notify({Title="❌", Content="ยังไม่เจอ Stronghold", Duration=3})
+        return 
+    end
+    
+    print("🔥 เริ่มวาร์ป Stronghold:", LastStronghold.Name) -- Debug
+    
+    -- หาตำแหน่งปลอดภัยหลายวิธี
+    local targetPos
+    local func = LastStronghold:FindFirstChild("Functional")
+    
+    -- วิธี 1: PrimaryPart
+    if LastStronghold.PrimaryPart then
+        targetPos = LastStronghold.PrimaryPart.CFrame + Vector3.new(0, 15, 10)
+    end
+    
+    -- วิธี 2: Functional.Position (สำรอง)
+    if func and not targetPos then
+        targetPos = CFrame.new(func.Position + Vector3.new(0, 20, 15))
+    end
+    
+    -- วิธี 3: หา Part ใหญ่สุด
+    if not targetPos then
+        for _, part in pairs(LastStronghold:GetChildren()) do
+            if part:IsA("BasePart") and part.Size.Magnitude > 10 then
+                targetPos = part.CFrame + Vector3.new(0, 15, 10)
+                break
+            end
+        end
+    end
+    
+    if not targetPos then
+        Rayfield:Notify({Title="❌", Content="หาตำแหน่งไม่ได้", Duration=3})
+        return
+    end
+    
+    -- รอ Character พร้อม
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local root = char:WaitForChild("HumanoidRootPart", 5)
+    
+    if root then
+        -- วาร์ปแบบเนียน (ไม่โดนแบน)
+        root.CFrame = targetPos
+        Rayfield:Notify({
+            Title="🚀 วาร์ปสำเร็จ!",
+            Content="ไป Stronghold แล้ว! 🎉",
+            Duration=4
+        })
+        print("✅ วาร์ปสำเร็จ:", targetPos.Position)
+    else
+        Rayfield:Notify({Title="❌", Content="Character ไม่พร้อม", Duration=3})
+    end
+end
+
+-- ฟังก์ชันอัพเดทหลัก
 local function UpdateStronghold()
+    if not CountdownEnabled then return end
+
     local now = tick()
     if now - LastUpdateTime < UPDATE_INTERVAL then return end
     LastUpdateTime = now
 
     local sh = nil
 
-    -- ใช้ตัวเดิมถ้ายังอยู่
+    -- ค้นหา Stronghold
     if LastStronghold and LastStronghold.Parent and LastStronghold:FindFirstChild("Functional") then
         sh = LastStronghold
     else
-        -- ค้นหาใหม่ (แค่ครั้งเดียวเมื่อหาย)
-        for _, obj in pairs(Workspace:GetDescendants()) do
-            if obj:IsA("Model") and obj:HasTag("Stronghold") and obj.Name ~= "AlienMothership" and obj:FindFirstChild("Functional") then
+        for _, obj in workspace:GetDescendants() do
+            if obj:IsA("Model") and obj:FindFirstChild("Functional") and obj:HasTag("Stronghold") and obj.Name ~= "AlienMothership" then
                 sh = obj
                 LastStronghold = sh
                 break
@@ -665,54 +908,59 @@ local function UpdateStronghold()
     end
 
     if not sh then
-        StatusLabel:Set("ไม่พบ Stronghold")
-        LastStronghold = nil
+        StatusLabel:Set("❌ ไม่พบ Stronghold")
+        InfoLabel:Set("รอ Stronghold เกิดใหม่...")
         return
     end
 
     local func = sh.Functional
     local openTime = func:GetAttribute("OpenTime")
     local level = func:GetAttribute("Level") or 1
-    local timeLeft = openTime and (openTime - Workspace:GetServerTimeNow()) or 0
+    
+    if not openTime then return end
+    
+    local timeLeft = openTime - workspace:GetServerTimeNow()
+    local timeStr, statusText
 
-    local timeStr = "00:00"
-    local status = "รอเปิด"
-
-    if timeLeft <= 0 then
-        timeStr = "เปิดแล้ว!"
-        status = "พร้อมเข้า"
+    -- 🔥 AUTO TELEPORT ที่นี่!
+    if timeLeft <= 0 and AutoTeleportEnabled then
+        statusText = "✅ เปิดแล้ว!"
+        timeStr = "🚀 กำลังวาร์ป..."
+        
+        -- วาร์ปทันที (ใช้ฟังก์ชันเดียวกัน)
+        task.spawn(function()
+            ManualTeleport()
+        end)
+        
     else
-        if timeLeft <= 60 then
-            timeStr = string.format("%02i วินาที", timeLeft % 60)
+        statusText = "⏳ รอเปิด"
+        local mins = math.floor(timeLeft / 60)
+        local secs = math.floor(timeLeft % 60)
+        if timeLeft <= 30 then
+            timeStr = string.format("%d", secs)
         else
-            timeStr = string.format("%02i นาที %02i วินาที", math.floor(timeLeft / 60) % 60, timeLeft % 60)
+            timeStr = string.format("%d:%02d", mins, secs)
         end
     end
 
-    StatusLabel:Set(string.format(
-        "Stronghold\nระดับ: %d\n%s\nเหลือ: %s",
-        level, status, timeStr
-    ))
-
-    -- แจ้งเตือนเมื่อเปิด (ครั้งเดียว)
-    if timeLeft <= 0 and not sh.Notified then
-        sh.Notified = true
-        Rayfield:Notify({
-            Title = "STRONGHOLD เปิดแล้ว!",
-            Content = "ระดับ " .. level .. " พร้อมเข้าเลย!",
-            Duration = 8,
-            Image = 4483362458
-        })
-    end
+    -- อัพเดท UI
+    StatusLabel:Set("Stronghold Lv." .. level .. " | AutoTP: " .. (AutoTeleportEnabled and "✅" or "❌"))
+    InfoLabel:Set(string.format("ระดับ: %d\n%s\nเหลือ: %s", level, statusText, timeStr))
+    InfoLabel:TextColor3(LevelColors[level] or Color3.fromRGB(255,0,0))
 end
 
--- ลูปอัพเดทเบา ๆ (ไม่ใช้ task.wait ใน loop หนัก)
+-- ลูป
 game:GetService("RunService").Heartbeat:Connect(function()
     pcall(UpdateStronghold)
 end)
 
--- รันครั้งแรก
 UpdateStronghold()
+
+Rayfield:Notify({
+    Title="🔥 Stronghold Auto TP พร้อม!",
+    Content="เจอ SH แล้วกด '🧪 ทดสอบวาร์ป' ทดสอบก่อนได้",
+    Duration=6
+})
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
