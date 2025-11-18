@@ -785,7 +785,7 @@ Rayfield:Notify({
 })
 
 -- ==============================
--- STRONGHOLD AUTO TELEPORT (แก้ปัญหาไม่วาร์ป 100%)
+-- STRONGHOLD AUTO TELEPORT (แก้ปัญหาไม่วาร์ป + กันวาร์ปรัว)
 -- ==============================
 local StrongholdTab = Window:CreateTab("Stronghold")
 
@@ -799,9 +799,10 @@ local LevelColors = {
 
 local LastStronghold = nil
 local LastUpdateTime = 0
-local UPDATE_INTERVAL = 0.3  -- ถี่ขึ้น
+local UPDATE_INTERVAL = 0.3  -- เช็คถี่ขึ้น
 local CountdownEnabled = true
 local AutoTeleportEnabled = true
+local LastTeleportKey = nil   -- ✅ กันวาร์ปซ้ำในรอบเดียว
 
 local StatusLabel = StrongholdTab:CreateLabel("กำลังค้นหา Stronghold...")
 local InfoLabel = StrongholdTab:CreateLabel("ระดับ: -\nสถานะ: รอเปิด\nเหลือเวลา: --:--")
@@ -810,13 +811,17 @@ local InfoLabel = StrongholdTab:CreateLabel("ระดับ: -\nสถานะ
 StrongholdTab:CreateToggle({
     Name = "เปิดใช้งาน Stronghold Countdown",
     CurrentValue = true,
-    Callback = function(val) CountdownEnabled = val end
+    Callback = function(val)
+        CountdownEnabled = val
+    end
 })
 
 StrongholdTab:CreateToggle({
     Name = "🚀 AUTO TELEPORT (วาร์ปทันที)",
     CurrentValue = true,
-    Callback = function(val) AutoTeleportEnabled = val end
+    Callback = function(val)
+        AutoTeleportEnabled = val
+    end
 })
 
 -- ปุ่มทดสอบวาร์ป (สำคัญมาก!)
@@ -827,29 +832,29 @@ StrongholdTab:CreateButton({
     end
 })
 
--- ฟังก์ชันวาร์ปที่เสถียร 100% (แก้ปัญหาทุกอย่าง)
+-- ฟังก์ชันวาร์ปที่เสถียร 100%
 function ManualTeleport()
-    if not LastStronghold then 
-        Rayfield:Notify({Title="❌", Content="ยังไม่เจอ Stronghold", Duration=3})
-        return 
+    if not LastStronghold then
+        Rayfield:Notify({Title = "❌", Content = "ยังไม่เจอ Stronghold", Duration = 3})
+        return
     end
-    
-    print("🔥 เริ่มวาร์ป Stronghold:", LastStronghold.Name) -- Debug
-    
+
+    print("🔥 เริ่มวาร์ป Stronghold:", LastStronghold.Name)
+
     -- หาตำแหน่งปลอดภัยหลายวิธี
     local targetPos
     local func = LastStronghold:FindFirstChild("Functional")
-    
+
     -- วิธี 1: PrimaryPart
     if LastStronghold.PrimaryPart then
         targetPos = LastStronghold.PrimaryPart.CFrame + Vector3.new(0, 15, 10)
     end
-    
+
     -- วิธี 2: Functional.Position (สำรอง)
     if func and not targetPos then
         targetPos = CFrame.new(func.Position + Vector3.new(0, 20, 15))
     end
-    
+
     -- วิธี 3: หา Part ใหญ่สุด
     if not targetPos then
         for _, part in pairs(LastStronghold:GetChildren()) do
@@ -859,32 +864,32 @@ function ManualTeleport()
             end
         end
     end
-    
+
     if not targetPos then
-        Rayfield:Notify({Title="❌", Content="หาตำแหน่งไม่ได้", Duration=3})
+        Rayfield:Notify({Title = "❌", Content = "หาตำแหน่งไม่ได้", Duration = 3})
         return
     end
-    
+
     -- รอ Character พร้อม
     local player = game.Players.LocalPlayer
     local char = player.Character or player.CharacterAdded:Wait()
     local root = char:WaitForChild("HumanoidRootPart", 5)
-    
+
     if root then
-        -- วาร์ปแบบเนียน (ไม่โดนแบน)
+        -- วาร์ปแบบเนียน
         root.CFrame = targetPos
         Rayfield:Notify({
-            Title="🚀 วาร์ปสำเร็จ!",
-            Content="ไป Stronghold แล้ว! 🎉",
-            Duration=4
+            Title = "🚀 วาร์ปสำเร็จ!",
+            Content = "ไป Stronghold แล้ว! 🎉",
+            Duration = 4
         })
         print("✅ วาร์ปสำเร็จ:", targetPos.Position)
     else
-        Rayfield:Notify({Title="❌", Content="Character ไม่พร้อม", Duration=3})
+        Rayfield:Notify({Title = "❌", Content = "Character ไม่พร้อม", Duration = 3})
     end
 end
 
--- ฟังก์ชันอัพเดทหลัก
+-- ฟังก์ชันอัปเดตหลัก
 local function UpdateStronghold()
     if not CountdownEnabled then return end
 
@@ -916,22 +921,31 @@ local function UpdateStronghold()
     local func = sh.Functional
     local openTime = func:GetAttribute("OpenTime")
     local level = func:GetAttribute("Level") or 1
-    
+
     if not openTime then return end
-    
+
     local timeLeft = openTime - workspace:GetServerTimeNow()
     local timeStr, statusText
 
-    -- 🔥 AUTO TELEPORT ที่นี่!
+    -- ✅ ใช้ key กันวาร์ปรอบเดิม
+    local teleportKey = tostring(sh:GetDebugId()) .. "|" .. tostring(openTime)
+
+    -- 🔥 AUTO TELEPORT แค่ครั้งเดียวต่อรอบ
     if timeLeft <= 0 and AutoTeleportEnabled then
         statusText = "✅ เปิดแล้ว!"
-        timeStr = "🚀 กำลังวาร์ป..."
-        
-        -- วาร์ปทันที (ใช้ฟังก์ชันเดียวกัน)
-        task.spawn(function()
-            ManualTeleport()
-        end)
-        
+
+        if LastTeleportKey ~= teleportKey then
+            -- ยังไม่เคยวาร์ปรอบนี้ -> วาร์ปเลย
+            LastTeleportKey = teleportKey
+            timeStr = "🚀 กำลังวาร์ป..."
+
+            task.spawn(function()
+                ManualTeleport()
+            end)
+        else
+            -- วาร์ปไปแล้วรอบนี้
+            timeStr = "✅ วาร์ปแล้ว รอรอบถัดไป"
+        end
     else
         statusText = "⏳ รอเปิด"
         local mins = math.floor(timeLeft / 60)
@@ -943,13 +957,13 @@ local function UpdateStronghold()
         end
     end
 
-    -- อัพเดท UI
+    -- อัปเดต UI
     StatusLabel:Set("Stronghold Lv." .. level .. " | AutoTP: " .. (AutoTeleportEnabled and "✅" or "❌"))
     InfoLabel:Set(string.format("ระดับ: %d\n%s\nเหลือ: %s", level, statusText, timeStr))
-    InfoLabel:TextColor3(LevelColors[level] or Color3.fromRGB(255,0,0))
+    InfoLabel.TextColor3 = LevelColors[level] or Color3.fromRGB(255, 0, 0)
 end
 
--- ลูป
+-- ลูปหลัก
 game:GetService("RunService").Heartbeat:Connect(function()
     pcall(UpdateStronghold)
 end)
@@ -957,10 +971,11 @@ end)
 UpdateStronghold()
 
 Rayfield:Notify({
-    Title="🔥 Stronghold Auto TP พร้อม!",
-    Content="เจอ SH แล้วกด '🧪 ทดสอบวาร์ป' ทดสอบก่อนได้",
-    Duration=6
+    Title = "🔥 Stronghold Auto TP พร้อม!",
+    Content = "เจอ SH แล้วกด '🧪 ทดสอบวาร์ป' ทดสอบก่อนได้",
+    Duration = 6
 })
+
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
