@@ -6,19 +6,19 @@ local Workspace = cloneref(game:GetService("Workspace"))
 -- ====== ตั้งค่า ======
 -- รูปแบบใหม่: { ["ชื่อไอเท็ม"] = จำนวนที่ต้องการ }
 local itemLimit = {
-    ["Log"] = 10,
-    ["Bolt"] = 10,
-    ["Sheet Metal"] = 10,
-    ["UFO Junk"] = 10,
-    ["UFO Component"] = 10,
-    ["Broken Fan"] = 10,
-    ["Old Radio"] = 10,
-    ["Broken Microwave"] = 10,
-    ["Tyre"] = 10,
-    ["Metal Chair"] = 10,
-    ["Old Car Engine"] = 10,
-    ["Washing Machine"] = 10,
-    ["UFO Scrap"] = 10
+    ["Log"] = 50,
+    ["Bolt"] = 50,
+    ["Sheet Metal"] = 50,
+    ["UFO Junk"] = 50,
+    ["UFO Component"] = 50,
+    ["Broken Fan"] = 50,
+    ["Old Radio"] = 50,
+    ["Broken Microwave"] = 50,
+    ["Tyre"] = 50,
+    ["Metal Chair"] = 50,
+    ["Old Car Engine"] = 50,
+    ["Washing Machine"] = 50,
+    ["UFO Scrap"] = 50
 }
 
 local TARGET_POSITION = Vector3.new(20.953277587890625, 1.200000286102295 + -5, -5.237123012542725)
