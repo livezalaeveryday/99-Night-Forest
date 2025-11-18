@@ -1,15 +1,28 @@
--- เสี่ยโอนไวโหมด: ลากได้หลายชื่อไอเทม ลงพิกัดที่กำหนด
+-- เสี่ยโอนไวโหมด: ลากลงพิกัดที่กำหนด + ระบุจำนวนต่อไอเท็ม
 local Players = cloneref(game:GetService("Players"))
 local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
 local Workspace = cloneref(game:GetService("Workspace"))
 
 -- ====== ตั้งค่า ======
--- ใส่ชื่อไอเทมได้หลายชิ้น เช่น {"Carrot", "Potato", "Onion"}
-local itemNames = {"Log", "Bolt", "Sheet Metal", "UFO Junk", "UFO Component", "Broken Fan", "Old Radio", "Broken Microwave", "Tyre", "Metal Chair", "Old Car Engine", "Washing Machine", "UFO Scrap"}
-local delayBetweenItems = 0.3 -- เร็วจี๊ด
+-- รูปแบบใหม่: { ["ชื่อไอเท็ม"] = จำนวนที่ต้องการ }
+local itemLimit = {
+    ["Log"] = 10,
+    ["Bolt"] = 10,
+    ["Sheet Metal"] = 10,
+    ["UFO Junk"] = 10,
+    ["UFO Component"] = 10,
+    ["Broken Fan"] = 10,
+    ["Old Radio"] = 10,
+    ["Broken Microwave"] = 10,
+    ["Tyre"] = 10,
+    ["Metal Chair"] = 10,
+    ["Old Car Engine"] = 10,
+    ["Washing Machine"] = 10,
+    ["UFO Scrap"] = 10
+}
 
--- ====== พิกัดเป้าหมาย (เพิ่ม Y +15 เพื่อให้ลากลงได้ดี) ======
 local TARGET_POSITION = Vector3.new(20.953277587890625, 1.200000286102295 + 300, -5.237123012542725)
+local delayBetweenItems = 0.3
 
 -- ====== เตรียมตัวละคร ======
 local player = Players.LocalPlayer
@@ -22,14 +35,17 @@ local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem")
 local stopDragging = remoteEvents:WaitForChild("StopDraggingItem")
 
--- ====== สร้างเซ็ตชื่อไอเทม (ไม่สนตัวพิมพ์) ======
-local nameSet = {}
-for _, n in ipairs(itemNames) do
-    nameSet[string.lower(n)] = true
+-- ====== ตัวนับที่ลากไปแล้ว ======
+local draggedCount = {}
+for name, _ in pairs(itemLimit) do
+    draggedCount[name] = 0
 end
 
-local function isTargetItem(name: string): boolean
-    return nameSet[string.lower(name)] == true
+-- ====== เช็คว่ายังต้องการไอเท็มนี้ไหม ======
+local function canDragMore(itemName)
+    local limit = itemLimit[itemName]
+    if not limit then return false end
+    return draggedCount[itemName] < limit
 end
 
 -- ====== ฟังก์ชันลาก ======
@@ -38,6 +54,7 @@ local function dragItemToPosition(itemToDrag, position)
     startDragging:FireServer(clonedItem)
     
     task.spawn(function()
+        task.wait(0.02) -- รอให้ server รับ dragging ก่อน
         if clonedItem:IsA("BasePart") then
             clonedItem.CFrame = CFrame.new(position)
         elseif clonedItem:IsA("Model") and clonedItem.PrimaryPart then
@@ -49,29 +66,49 @@ local function dragItemToPosition(itemToDrag, position)
     stopDragging:FireServer(clonedItem)
 end
 
--- ====== ลากทุกไอเทมลงพิกัดที่กำหนด ======
-local function dragAllItemsToTarget()
+-- ====== ลากตามจำนวนที่กำหนด ======
+local function dragLimitedItemsToTarget()
     print("🎯 พิกัดเป้าหมาย:", TARGET_POSITION)
     
     local children = itemsFolder:GetChildren()
     local itemsToDrag = {}
     
+    -- เก็บเฉพาะไอเท็มที่ยังต้องการ
     for _, item in ipairs(children) do
-        if isTargetItem(item.Name) then
+        if canDragMore(item.Name) then
             table.insert(itemsToDrag, item)
         end
     end
     
-    print("🔍 พบ " .. #itemsToDrag .. " ไอเทมที่จะลาก")
+    print("🔍 พบ " .. #itemsToDrag .. " ไอเทมที่จะลาก (ตามจำนวนที่กำหนด)")
     
+    -- เรียงตามระยะห่างจากเป้าหมาย (ใกล้ก่อน)
+    table.sort(itemsToDrag, function(a, b)
+        local distA = (a:GetPivot().Position - TARGET_POSITION).Magnitude
+        local distB = (b:GetPivot().Position - TARGET_POSITION).Magnitude
+        return distA < distB
+    end)
+    
+    local totalDragged = 0
     for i, item in ipairs(itemsToDrag) do
-        print("ลากไอเทมที่ " .. i .. ": " .. item.Name)
-        dragItemToPosition(item, TARGET_POSITION)
-        task.wait(delayBetweenItems)
+        if canDragMore(item.Name) then
+            print(string.format("ลากไอเทมที่ %d: %s (%d/%d)", i, item.Name, draggedCount[item.Name] + 1, itemLimit[item.Name]))
+            dragItemToPosition(item, TARGET_POSITION)
+            draggedCount[item.Name] = draggedCount[item.Name] + 1
+            totalDragged = totalDragged + 1
+            task.wait(delayBetweenItems)
+        end
     end
     
-    print("🎉 เสร็จแล้ว! ลากทั้งหมด " .. #itemsToDrag .. " ชิ้นลงพิกัดเรียบร้อย!")
+    -- สรุปผลละเอียด
+    print("🎉 เสร็จแล้ว! ลากทั้งหมด " .. totalDragged .. " ชิ้น")
+    print("📊 สรุปผล:")
+    for name, limit in pairs(itemLimit) do
+        local count = draggedCount[name]
+        local status = count >= limit and "✅" or "⏳"
+        print(string.format("  %s %s: %d/%d", status, name, count, limit))
+    end
 end
 
 -- รันเลย!
-dragAllItemsToTarget()
+dragLimitedItemsToTarget()
