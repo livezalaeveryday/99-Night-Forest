@@ -965,7 +965,7 @@ local Toggle = ChopTab:CreateToggle({
 
 local RadiusSlider = ChopTab:CreateSlider({
     Name = "ระยะตี (Studs)",
-    Range = {10, 500},
+    Range = {100, 100},
     Increment = 10,
     Suffix = " studs",
     CurrentValue = auraRadius,
@@ -977,7 +977,7 @@ local RadiusSlider = ChopTab:CreateSlider({
 
 local SpeedSlider = ChopTab:CreateSlider({
     Name = "ความเร็วตี (เร็ว = เสี่ยงแบน)",
-    Range = {0.1, 1},
+    Range = {0.3, 0.3},
     Increment = 0.05,
     Suffix = "s",
     CurrentValue = chopDelay,
