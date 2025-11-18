@@ -21,7 +21,7 @@ local itemLimit = {
     ["UFO Scrap"] = 50
 }
 
-local TARGET_POSITION = Vector3.new(20.953277587890625, 1.200000286102295 + -5, -5.237123012542725)
+local TARGET_POSITION = Vector3.new(20.953277587890625, 1.200000286102295 - 1, -5.237123012542725)
 local delayBetweenItems = 1
 
 -- ====== เตรียมตัวละคร ======
