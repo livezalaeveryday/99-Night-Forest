@@ -398,6 +398,59 @@ friendTab:CreateSlider({
     Callback = function(val) DragDelay = val end
 })
 
+-- ===== ปุ่ม “ลากศพทั้งหมด” (ไม่ใช้ dropdown) =====
+friendTab:CreateButton({
+    Name = "ลากศพทั้งหมด (ไม่ต้องเลือกชื่อ)",
+    Callback = function()
+        -- เตรียมตัวเรา
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+
+        -- เตรียม RemoteEvents
+        local remoteEvents = ReplicatedStorage:FindFirstChild("RemoteEvents")
+        local startDragging = remoteEvents and remoteEvents:FindFirstChild("RequestStartDraggingItem")
+        local stopDragging  = remoteEvents and remoteEvents:FindFirstChild("StopDraggingItem")
+
+        if not (startDragging and stopDragging) then
+            Rayfield:Notify({Title = "ผิดพลาด", Content = "ไม่พบ RemoteEvent ลากศพ", Duration = 5})
+            return
+        end
+
+        -- หา “ศพทั้งหมด”
+        local bodies = getAllBodies()
+        if #bodies == 0 then
+            Rayfield:Notify({Title = "ไม่พบศพ", Content = "ตอนนี้ยังไม่มีใครตาย", Duration = 4})
+            return
+        end
+
+        Rayfield:Notify({Title = "กำลังลากศพ", Content = "พบ "..#bodies.." ตัว", Duration = 3})
+
+        task.spawn(function()
+            for _, body in ipairs(bodies) do
+                -- กันกรณีออบเจ็กต์หายระหว่างทาง
+                if body and body.Parent then
+                    local inst = (typeof(cloneref) == "function") and cloneref(body) or body
+                    startDragging:FireServer(inst)
+                    task.wait(0.02)
+
+                    -- เลือกพาร์ทอ้างอิงเพื่อวางให้ใกล้ตัวเรา
+                    local refPart = findAnyBasePart(body)
+                    if refPart then
+                        -- ใช้ PivotTo ให้ทั้งโมเดลเลื่อนมาหน้าเรา
+                        body:PivotTo(hrp.CFrame * CFrame.new(0, 0, -DragOffset))
+                    end
+
+                    task.wait(0.05)
+                    stopDragging:FireServer(inst)
+                    task.wait(DragDelay)
+                end
+            end
+
+            Rayfield:Notify({Title = "สำเร็จ!", Content = "ลากศพทั้งหมด "..#bodies.." ตัว!", Duration = 4})
+        end)
+    end
+})
+
 -- Hotkey สำหรับลากศพทั้งหมด (กด Numpad5)
 MainTab:CreateKeybind({  -- หรือ friendTab ถ้าอยากให้อยู่ในแท็บเดียวกัน
     Name = "ลากศพทั้งหมด (Hotkey)",
