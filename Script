@@ -1205,7 +1205,7 @@ local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem")
 local stopDragging = remoteEvents:WaitForChild("StopDraggingItem")
 
-local offsetDistance = 10
+local offsetDistance = 3
 local dragDelay = 0.03
 
 -- รายชื่อ 57 ชิ้นล่าสุด (เรียง A→Z)
