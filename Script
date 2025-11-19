@@ -643,8 +643,8 @@ local allWeapons = {
 local function getWeapon()
     if not player:FindFirstChild("Inventory") then return nil end
     
-    local priorityWeapons = {"Scythe","Infernal Sword","Strong Axe","Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear"}
-    local normalWeapons = {"Katana", "Spear", "Trident", "Scythe", "Morningstar", "Old Axe", "Cultist King Mace", "Obsidiron Hammer"}
+    local priorityWeapons = {"Scythe","Infernal Sword","Strong Axe","Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear","Katana", "Spear", "Trident", "Scythe", "Morningstar", "Old Axe", "Cultist King Mace"}
+    local normalWeapons = {"Obsidiron Hammer"}
     
     for _, weaponName in ipairs(priorityWeapons) do
         local weapon = player.Inventory:FindFirstChild(weaponName)
@@ -1205,20 +1205,13 @@ local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem")
 local stopDragging = remoteEvents:WaitForChild("StopDraggingItem")
 
-local offsetDistance = 3
+local offsetDistance = 10
 local dragDelay = 0.03
 
 -- รายชื่อ 57 ชิ้นล่าสุด (เรียง A→Z)
 local itemList = {
-    "Air Rifle","Alpha Wolf Corpse","Anvil Back","Anvil Base","Anvil Front","Apple","Bandage",
-    "Basketball","Berry","Bolt","Broken Fan","Broken Microwave","Cake","Carrot","Chair","Coal",
-    "Coin Stack","Cultist Experiment","Cultist Gem","Cultist Prototype","Feather","Fuel Canister",
-    "Gem of the Forest Fragment","Giant Sack","Halloween Chest1","Iron Body","Item Chest",
-    "Item Chest2","Item Chest3","Item Chest4","Item Chest5","Item Chest6","Leather Body","Log",
-    "MedKit","Metal Chair","Oil Barrel","Old Car Engine","Old Flashlight","Old Radio","Old Rod",
-    "Old Taming Flute","Purple Fur Tuft","Revolver Ammo","Rifle","Rifle Ammo","Sapling","Seed Box",
-    "Sheet Metal","Snow Chest1","Snow Chest2","Strong Flashlight","Tyre","Washing Machine","Wolf Corpse"
-}
+ "Air Rifle","Alpha Wolf Pelt","Anvil Back","Anvil Base","Anvil Front","Apple","Bandage","Basketball","Bear Corpse","Bear Pelt","Berry","Bolt","Broken Fan","Broken Microwave","Bunny Foot","Cake","Carnival Basketball","Carnival Ring","Carrot","Chair","Coal","Coin Stack","Cooked Morsel","Crossbow Cultist","Cultist","Cultist Gem","Cultist Prototype","Defense Blueprint","Fuel Canister","Gem of the Forest Fragment","Giant Sack","Good Axe","Halloween Chest1","Infernal Sack","Iron Body","Item Chest","Item Chest2","Item Chest3","Item Chest4","Item Chest5","Item Chest6","Leather Body","Log","MedKit","Morsel","Oil Barrel","Old Car Engine","Old Flashlight","Old Radio","Old Rod","Old Taming Flute","Potion","Purple Fur Tuft","Revolver","Revolver Ammo","Rifle","Rifle Ammo","Scorpion Shell","Seed Box","Sheet Metal","Steak","Strong Axe","Strong Flashlight","Stronghold Diamond Chest","Tactical Shotgun","Thorn Body","Tyre","Volcanic Chest1","Volcanic Chest2","Washing Machine","Wolf Corpse"
+ }
 
 local function dragItem(item)
     if not (item and item.Parent) then return false end
@@ -1278,21 +1271,6 @@ for i = 1, #itemList, 4 do
         })
     end
 end
-
--- ปุ่มดึงทั้งหมด
-Tab:CreateButton({
-    Name = "ดึงทั้ง 57 ชนิดเลย!",
-    Callback = function()
-        Rayfield:Notify({Title="กำลังดึงทั้งหมด...", Content="จำนวน: "..amount.." ต่อชนิด", Duration=10})
-        local total = 0
-        for _, name in itemList do
-            for _, it in getItems(name, amount) do
-                if dragItem(it) then total += 1 end
-            end
-        end
-        Rayfield:Notify({Title="เสร็จสิ้น!", Content="ดึงแล้วทั้งหมด "..total.." ชิ้น", Duration=8})
-    end
-})
 
 -- อัปเดต HRP
 player.CharacterAdded:Connect(function(c)
