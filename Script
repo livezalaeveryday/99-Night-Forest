@@ -634,7 +634,7 @@ local Characters = Workspace:WaitForChild("Characters")
 
 -- รายการอาวุธทั้งหมด (15 ชิ้น)
 local allWeapons = {
-    "Scythe","Spear","Infernal Sword", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
+    "Scythe", "Spear", "Infernal Sword", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
     "Trident", "Poison Spear", "Infernal Sword", "Cultist King Mace",
     "Obsidiron Hammer", "Scythe", "Vampire Scythe", "Old Axe", "Strong Axe", "Good Axe"
 }
@@ -643,7 +643,7 @@ local allWeapons = {
 local function getWeapon()
     if not player:FindFirstChild("Inventory") then return nil end
     
-    local priorityWeapons = {"Scythe","Infernal Sword","Strong Axe","Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear","Katana", "Spear", "Trident", "Scythe", "Morningstar", "Old Axe", "Cultist King Mace"}
+    local priorityWeapons = {"Scythe", "Infernal Sword", "Strong Axe", "Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear","Katana", "Spear", "Trident", "Scythe", "Morningstar", "Old Axe", "Cultist King Mace"}
     local normalWeapons = {"Obsidiron Hammer"}
     
     for _, weaponName in ipairs(priorityWeapons) do
