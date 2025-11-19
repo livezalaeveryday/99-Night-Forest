@@ -994,6 +994,9 @@ local SpeedSlider = ChopTab:CreateSlider({
     end,
 })
 
+
+
+
 -- ==============================
 -- STRONGHOLD AUTO TELEPORT (แก้ปัญหาไม่วาร์ป + กันวาร์ปรัว)
 -- ==============================
@@ -1020,7 +1023,7 @@ local InfoLabel = StrongholdTab:CreateLabel("ระดับ: -\nสถานะ
 -- Toggles
 StrongholdTab:CreateToggle({
     Name = "เปิดใช้งาน Stronghold Countdown",
-    CurrentValue = true,
+    CurrentValue = false,
     Callback = function(val)
         CountdownEnabled = val
     end
@@ -1028,7 +1031,7 @@ StrongholdTab:CreateToggle({
 
 StrongholdTab:CreateToggle({
     Name = "🚀 AUTO TELEPORT (วาร์ปทันที)",
-    CurrentValue = true,
+    CurrentValue = false,
     Callback = function(val)
         AutoTeleportEnabled = val
     end
@@ -1186,204 +1189,118 @@ Rayfield:Notify({
     Duration = 6
 })
 
--- === Drag Items (EZ) + Quantity (Simple UI) ===
+-- แค่ Tab เดียว | ไม่โหลด Rayfield ใหม่ | 57 ชิ้นล่าสุด
+
+local Tab = Window:CreateTab("ดึงของ")
+
 local cloneref = cloneref or function(x) return x end
-
--- Services & refs
-local Players          = cloneref(game:GetService("Players"))
+local Players = cloneref(game:GetService("Players"))
+local Workspace = cloneref(game:GetService("Workspace"))
 local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
-local Workspace        = cloneref(game:GetService("Workspace"))
-local RunService       = game:GetService("RunService")
-
-local player    = Players.LocalPlayer
+local player = Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
-local hrp       = character:WaitForChild("HumanoidRootPart")
+local hrp = character:WaitForChild("HumanoidRootPart")
 
-local itemsFolder  = Workspace:WaitForChild("Items")
 local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem")
-local stopDragging  = remoteEvents:WaitForChild("StopDraggingItem")
+local stopDragging = remoteEvents:WaitForChild("StopDraggingItem")
 
--- ตั้งค่าเบื้องต้น
-local offsetDistance = 2       -- วางของไว้หน้าตัวละครกี่สตู
-local perItemDelay   = 0       -- เวอร์ชันง่าย: ลากรัว ๆ ไม่ต้องตั้งค่าใน UI
+local offsetDistance = 3
+local dragDelay = 0.03
 
--- helper: Rayfield dropdown บางเวอร์ชันคืน table
-local function asString(opt)
-    if type(opt) == "table" then return tostring(opt[1]) end
-    return tostring(opt)
-end
+-- รายชื่อ 57 ชิ้นล่าสุด (เรียง A→Z)
+local itemList = {
+    "Air Rifle","Alpha Wolf Corpse","Anvil Back","Anvil Base","Anvil Front","Apple","Bandage",
+    "Basketball","Berry","Bolt","Broken Fan","Broken Microwave","Cake","Carrot","Chair","Coal",
+    "Coin Stack","Cultist Experiment","Cultist Gem","Cultist Prototype","Feather","Fuel Canister",
+    "Gem of the Forest Fragment","Giant Sack","Halloween Chest1","Iron Body","Item Chest",
+    "Item Chest2","Item Chest3","Item Chest4","Item Chest5","Item Chest6","Leather Body","Log",
+    "MedKit","Metal Chair","Oil Barrel","Old Car Engine","Old Flashlight","Old Radio","Old Rod",
+    "Old Taming Flute","Purple Fur Tuft","Revolver Ammo","Rifle","Rifle Ammo","Sapling","Seed Box",
+    "Sheet Metal","Snow Chest1","Snow Chest2","Strong Flashlight","Tyre","Washing Machine","Wolf Corpse"
+}
 
--- รวบรวมชื่อทุกไอเทม เรียง A→Z
-local function getSortedItemNames()
-    local seen = {}
-    for _, it in ipairs(itemsFolder:GetChildren()) do
-        if it and it.Name then
-            seen[it.Name] = true
-        end
-    end
-
-    local names = {}
-    for n in pairs(seen) do
-        table.insert(names, n)
-    end
-
-    table.sort(names, function(a, b)
-        return string.lower(a) < string.lower(b)
-    end)
-
-    if #names == 0 then
-        names = {"(ไม่มีไอเทมใน Items)"}
-    end
-
-    return names
-end
-
--- หา “หลายชิ้น” ตามชื่อ (หยิบได้สูงสุด maxCount)
-local function findItemsByName(name, maxCount)
-    local list = {}
-    for _, it in ipairs(itemsFolder:GetChildren()) do
-        if it.Name == name then
-            table.insert(list, it)
-            if #list >= maxCount then
-                break
-            end
-        end
-    end
-    return list
-end
-
--- ลากของ 1 ชิ้นมาหน้าเรา
-local function dragOne(item)
+local function dragItem(item)
     if not (item and item.Parent) then return false end
-
-    local cloned = cloneref(item)
-
-    startDragging:FireServer(cloned)
-    RunService.Heartbeat:Wait() -- เผื่อให้สถานะลากเซิร์ฟเวอร์เซ็ตทัน
-
+    local clone = cloneref(item)
+    startDragging:FireServer(clone)
+    task.wait(0.03)
     local pos = (hrp.CFrame * CFrame.new(0, 0, -offsetDistance)).Position
-
     task.spawn(function()
-        if cloned:IsA("BasePart") then
-            cloned.CFrame = CFrame.new(pos)
-        elseif cloned:IsA("Model") and cloned.PrimaryPart then
-            cloned:SetPrimaryPartCFrame(CFrame.new(pos))
-        end
+        if clone:IsA("BasePart") then clone.CFrame = CFrame.new(pos)
+        elseif clone:IsA("Model") and clone.PrimaryPart then clone:SetPrimaryPartCFrame(CFrame.new(pos)) end
     end)
-
     task.wait(0.05)
-    stopDragging:FireServer(cloned)
+    stopDragging:FireServer(clone)
+    task.wait(dragDelay)
     return true
 end
 
--- ===== UI =====
-local tab = Window:CreateTab("ดึงของเข้าตัว", 0)
-
--- 1) Dropdown รายชื่อไอเทม
-local options  = getSortedItemNames()
-local selected = asString(options[1])
-if selected == "(ไม่มีไอเทมใน Items)" then
-    selected = nil
+local function getItems(name, max)
+    local t = {}
+    for _, v in ipairs(Workspace.Items:GetChildren()) do
+        if v.Name == name then
+            table.insert(t, v)
+            if #t >= max then break end
+        end
+    end
+    return t
 end
 
-local dropdown = tab:CreateDropdown({
-    Name = "เลือกไอเทม (ทั้งหมด เรียง A→Z)",
-    Options = options,
-    CurrentOption = options[1],
-    Multiple = false,
-    Callback = function(opt)
-        selected = asString(opt)
-        if selected == "(ไม่มีไอเทมใน Items)" then
-            selected = nil
-        end
-    end
-})
-
--- 2) ปุ่มรีเฟรชรายชื่อ
-tab:CreateButton({
-    Name = "รีเฟรชรายชื่อ",
-    Callback = function()
-        options = getSortedItemNames()
-
-        -- ใช้ Refresh ให้ถูกกับ Rayfield
-        dropdown:Refresh(options, true)
-
-        selected = asString(options[1])
-        if selected == "(ไม่มีไอเทมใน Items)" then
-            selected = nil
-        else
-            dropdown:Set(options[1])
-        end
-
-        Rayfield:Notify({
-            Title   = "อัปเดตแล้ว",
-            Content = "รีเฟรชรายการสำเร็จ",
-            Duration = 2
-        })
-    end
-})
-
--- 3) ระบุจำนวน (ใช้ Slider ง่าย ๆ)
-local currentQty = 10
-tab:CreateSlider({
-    Name = "จำนวนที่จะดึง",
-    Range = {1, 500},       -- เพดาน 500 ให้ดูไม่โหดเกิน (ปรับได้)
+-- Slider จำนวน
+local amount = 10
+Tab:CreateSlider({
+    Name = "จำนวนต่อชนิด",
+    Range = {1, 500},
     Increment = 1,
-    CurrentValue = currentQty,
-    Callback = function(v)
-        currentQty = v
-    end
+    CurrentValue = 10,
+    Callback = function(v) amount = v end
 })
 
--- 4) ปุ่มดึงตามจำนวน
-tab:CreateButton({
-    Name = "ดึงตามจำนวน",
-    Callback = function()
-        if not selected then
-            Rayfield:Notify({
-                Title = "ยังไม่มีของ",
-                Content = "กรุณาเลือกไอเทมก่อน",
-                Duration = 2
-            })
-            return
-        end
-
-        local want    = currentQty or 1
-        local targets = findItemsByName(selected, want)
-
-        if #targets == 0 then
-            Rayfield:Notify({
-                Title = "ไม่พบ",
-                Content = "ไม่มี " .. selected .. " ให้ดึง",
-                Duration = 2
-            })
-            return
-        end
-
-        local dragged = 0
-        for _, it in ipairs(targets) do
-            if dragOne(it) then
-                dragged += 1
+-- ปุ่มไอเทมทั้ง 57 ชิ้น (เรียง 4 คอลัมน์)
+for i = 1, #itemList, 4 do
+    for j = i, math.min(i+3, #itemList) do
+        local name = itemList[j]
+        Tab:CreateButton({
+            Name = name,
+            Callback = function()
+                local found = getItems(name, amount)
+                if #found == 0 then
+                    Rayfield:Notify({Title="ไม่พบ", Content=name.." ไม่มีในแมพ", Duration=3})
+                    return
+                end
+                local c = 0
+                for _, it in found do
+                    if dragItem(it) then c += 1 end
+                end
+                Rayfield:Notify({Title="สำเร็จ", Content="ดึง "..name.." x"..c, Duration=3})
             end
-            if perItemDelay > 0 then
-                task.wait(perItemDelay)
-            end
-        end
-
-        Rayfield:Notify({
-            Title = "สำเร็จ",
-            Content = "ดึง " .. selected .. " มาแล้ว " .. tostring(dragged) .. " ชิ้น",
-            Duration = 3
         })
     end
+end
+
+-- ปุ่มดึงทั้งหมด
+Tab:CreateButton({
+    Name = "ดึงทั้ง 57 ชนิดเลย!",
+    Callback = function()
+        Rayfield:Notify({Title="กำลังดึงทั้งหมด...", Content="จำนวน: "..amount.." ต่อชนิด", Duration=10})
+        local total = 0
+        for _, name in itemList do
+            for _, it in getItems(name, amount) do
+                if dragItem(it) then total += 1 end
+            end
+        end
+        Rayfield:Notify({Title="เสร็จสิ้น!", Content="ดึงแล้วทั้งหมด "..total.." ชิ้น", Duration=8})
+    end
 })
 
--- อัปเดต HRP เมื่อรีสปอน
-player.CharacterAdded:Connect(function(char)
-    character = char
-    hrp = character:WaitForChild("HumanoidRootPart")
+-- อัปเดต HRP
+player.CharacterAdded:Connect(function(c)
+    character = c
+    hrp = c:WaitForChild("HumanoidRootPart")
 end)
+
+Rayfield:Notify({Title="โหลด Tab สำเร็จ", Content="57 ชิ้นล่าสุด พร้อมใช้!", Duration=5})
 
 -- === แท็บใหม่: ฟังก์ชันเสริม ===
 local miscTab = Window:CreateTab("ฟังก์ชันเสริม")
@@ -1568,5 +1485,162 @@ player.CharacterAdded:Connect(function(c)
     infJumpEnabled = false
     Rayfield:LoadConfiguration()
 end)
+
+-- === หลอด HP ต้นไม้แบบเรียบ (ไม่มีตัวเลข) ===
+local TreeHPToggle = false
+local TreeHPConnections = {}
+local TreeHPGuis = {}
+
+local function CreateTreeHPBar(tree)
+    if not tree or TreeHPGuis[tree] then return end
+    
+    local trunk = tree:FindFirstChild("Trunk")
+    if not trunk then return end
+    
+    local bill = Instance.new("BillboardGui")
+    bill.Name = "TreeHPBar"
+    bill.Adornee = trunk
+    bill.Size = UDim2.new(3, 0, 0.6, 0)  -- เล็กกว่าก่อน
+    bill.StudsOffset = Vector3.new(0, 4, 0)
+    bill.AlwaysOnTop = true
+    bill.LightInfluence = 0
+    bill.Parent = trunk
+    
+    local frame = Instance.new("Frame", bill)
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundTransparency = 0.3
+    frame.BackgroundColor3 = Color3.new(0, 0, 0)
+    frame.BorderSizePixel = 0
+    frame.ClipsDescendants = true
+    
+    local corner1 = Instance.new("UICorner", frame)
+    corner1.CornerRadius = UDim.new(0, 6)
+    
+    local fill = Instance.new("Frame", frame)
+    fill.Name = "Fill"
+    fill.Size = UDim2.new(1, 0, 1, 0)
+    fill.Position = UDim2.new(0, 0, 0, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(0, 255, 100)  -- เขียวเต็ม
+    fill.BorderSizePixel = 0
+    
+    local corner2 = Instance.new("UICorner", fill)
+    corner2.CornerRadius = UDim.new(0, 4)
+    
+    TreeHPGuis[tree] = {Billboard = bill, Fill = fill, Frame = frame}
+end
+
+local function UpdateTreeHPBar(tree)
+    local guiData = TreeHPGuis[tree]
+    if not guiData then return end
+    
+    local currentHP = tree:GetAttribute("Health") or 0
+    local maxHP = tree:GetAttribute("MaxHealth") or 100
+    local percent = math.clamp(currentHP / maxHP, 0, 1)
+    
+    -- ลดหลอดเรียลไทม์ + เปลี่ยนสี
+    guiData.Fill.Size = UDim2.new(percent, 0, 1, 0)
+    guiData.Fill:TweenSize(UDim2.new(percent, 0, 1, 0), "Out", "Quad", 0.1, true)
+    
+    -- สีหลอดตาม HP (เขียว → เหลือง → ส้ม → แดง)
+    if percent > 0.7 then
+        guiData.Fill.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+    elseif percent > 0.4 then
+        guiData.Fill.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+    elseif percent > 0.2 then
+        guiData.Fill.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+    else
+        guiData.Fill.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    end
+end
+
+local function EnableTreeHP()
+    if TreeHPToggle then return end
+    TreeHPToggle = true
+    
+    -- สร้างหลอดให้ต้นไม้ทั้งหมดที่มีอยู่
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and 
+           (obj:FindFirstChild("TreeClass") or 
+            obj.Name:find("Tree") or 
+            obj.Name == "Small Tree" or 
+            obj.Name == "Big Tree") and 
+           obj:FindFirstChild("Trunk") then
+            CreateTreeHPBar(obj)
+        end
+    end
+    
+    -- ติดตามต้นไม้ใหม่
+    TreeHPConnections.Added = workspace.DescendantAdded:Connect(function(obj)
+        if not TreeHPToggle then return end
+        task.wait(0.2)
+        if obj:IsA("Model") and 
+           (obj:FindFirstChild("TreeClass") or obj.Name:find("Tree")) and 
+           obj:FindFirstChild("Trunk") then
+            CreateTreeHPBar(obj)
+        end
+    end)
+    
+    -- อัปเดต HP เรียลไทม์ (ลดตอนตี)
+    TreeHPConnections.Update = game:GetService("RunService").Heartbeat:Connect(function()
+        if not TreeHPToggle then return end
+        for tree, _ in pairs(TreeHPGuis) do
+            if tree and tree.Parent and tree:FindFirstChild("Trunk") then
+                UpdateTreeHPBar(tree)
+            else
+                -- ลบหลอดถ้าต้นไม้หาย
+                if TreeHPGuis[tree] then
+                    TreeHPGuis[tree].Billboard:Destroy()
+                    TreeHPGuis[tree] = nil
+                end
+            end
+        end
+    end)
+    
+    Rayfield:Notify({
+        Title = "🌳 เปิดหลอด HP ต้นไม้!", 
+        Content = "หลอดลดเรียลไทม์ตอนตี (ไม่มีตัวเลข)", 
+        Duration = 3,
+        Image = 6026568198
+    })
+end
+
+local function DisableTreeHP()
+    if not TreeHPToggle then return end
+    TreeHPToggle = false
+    
+    -- ลบหลอดทั้งหมด
+    for _, data in pairs(TreeHPGuis) do
+        if data.Billboard then 
+            data.Billboard:Destroy() 
+        end
+    end
+    TreeHPGuis = {}
+    
+    -- ตัด Connection
+    for _, conn in pairs(TreeHPConnections) do
+        if conn then conn:Disconnect() end
+    end
+    TreeHPConnections = {}
+    
+    Rayfield:Notify({
+        Title = "🌳 ปิดหลอด HP ต้นไม้", 
+        Content = "หลอดหายหมดแล้ว", 
+        Duration = 2
+    })
+end
+
+-- 🔥 เพิ่ม Toggle ในแท็บ "ตัดไม้" (ChopTab)
+ChopTab:CreateToggle({
+    Name = "🌳 หลอด HP ต้นไม้ (เรียบ - ลดตอนตี)",
+    CurrentValue = false,
+    Flag = "TreeHPBar",
+    Callback = function(val)
+        if val then
+            EnableTreeHP()
+        else
+            DisableTreeHP()
+        end
+    end
+})
 
 Rayfield:Notify({Title="โหลดสำเร็จ!", Content="พร้อมลุย ไลฟ์สาระ ไปวันๆ!", Duration=4, Image=6026568198})
