@@ -1,4 +1,4 @@
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+ไlocal Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
 -- สร้าง Window
 local Window = Rayfield:CreateWindow({
@@ -898,19 +898,26 @@ local function chopAuraLoop()
         equipTool(tool)
 
         local trees = {}
-        local map = Workspace:FindFirstChild("Map")
-        if not map then continue end
 
-        -- รวบรวมต้นไม้ทั้งหมด
-        for _, folder in pairs({map:FindFirstChild("Foliage"), map:FindFirstChild("Landmarks")}) do
-            if folder then
-                for _, obj in ipairs(folder:GetChildren()) do
-                    if obj.Name == "Small Tree" and obj:IsA("Model") then
-                        table.insert(trees, obj)
-                    end
-                end
-            end
+local function addTreesFromFolder(folder)
+    if not folder then return end
+    for _, obj in ipairs(folder:GetChildren()) do
+        if obj:IsA("Model") and (
+            obj:FindFirstChild("TreeClass") or  -- ต้นไม้หลักทั้งหมด
+            obj.Name == "Small Tree" or 
+            obj.Name == "Big Tree" or
+            obj.Name:find("Tree")  -- ชื่อมี Tree ด้วย
+        ) then
+            table.insert(trees, obj)
         end
+    end
+end
+
+local map = Workspace:FindFirstChild("Map")
+if map then
+    addTreesFromFolder(map:FindFirstChild("Foliage"))
+    addTreesFromFolder(map:FindFirstChild("Landmarks"))
+end
 
         for _, tree in ipairs(trees) do
             if not chopAuraToggle then break end
