@@ -1422,8 +1422,6 @@ miscTab:CreateToggle({
     end
 })
 
--- วางแทนโค้ดเก่าทั้งหมดของ Instant Interact ได้เลย
-local InstantTab = Window:CreateTab("Instant Features", "zap")
 
 local instantInteractEnabled = false
 local originalHoldDurations = {}
@@ -1489,7 +1487,7 @@ local function disableInstant()
 end
 
 -- Toggle หลัก
-InstantTab:CreateToggle({
+miscTab:CreateToggle({
     Name = "Instant Interact (ลื่นสุด ไม่กระตุก)",
     CurrentValue = false,
     Callback = function(state)
@@ -1502,10 +1500,6 @@ InstantTab:CreateToggle({
     end,
 })
 
-InstantTab:CreateParagraph({
-    Title = "Info",
-    Content = "• ไม่กระตุกอีกต่อไป (ใช้ Connection ไม่ใช้ loop)\n• กด E ทุกอย่างทันที + ระยะไกล 50 หน่วย\n• ไม่ต้องมองเห็นก็กดได้\n• รองรับ Chest, Door, Trader, Campfire, เก็บของ ทุกอย่าง"
-})
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
