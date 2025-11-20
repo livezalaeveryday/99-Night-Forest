@@ -994,291 +994,204 @@ local SpeedSlider = ChopTab:CreateSlider({
     end,
 })
 
-
-
-
--- ==============================
--- STRONGHOLD AUTO TELEPORT (แก้ปัญหาไม่วาร์ป + กันวาร์ปรัว)
--- ==============================
-local StrongholdTab = Window:CreateTab("ปราสาทเพชร")
-
-local LevelColors = {
-    [1] = Color3.fromRGB(195, 255, 0),
-    [2] = Color3.fromRGB(255, 238, 0),
-    [3] = Color3.fromRGB(255, 157, 0),
-    [4] = Color3.fromRGB(255, 64, 0),
-    [5] = Color3.fromRGB(255, 0, 0)
-}
-
-local LastStronghold = nil
-local LastUpdateTime = 0
-local UPDATE_INTERVAL = 0.3  -- เช็คถี่ขึ้น
-local CountdownEnabled = true
-local AutoTeleportEnabled = true
-local LastTeleportKey = nil   -- ✅ กันวาร์ปซ้ำในรอบเดียว
-
-local StatusLabel = StrongholdTab:CreateLabel("กำลังค้นหา Stronghold...")
-local InfoLabel = StrongholdTab:CreateLabel("ระดับ: -\nสถานะ: รอเปิด\nเหลือเวลา: --:--")
-
--- Toggles
-StrongholdTab:CreateToggle({
-    Name = "เปิดใช้งาน Stronghold Countdown",
-    CurrentValue = false,
-    Callback = function(val)
-        CountdownEnabled = val
-    end
-})
-
-StrongholdTab:CreateToggle({
-    Name = "🚀 AUTO TELEPORT (วาร์ปทันที)",
-    CurrentValue = false,
-    Callback = function(val)
-        AutoTeleportEnabled = val
-    end
-})
-
--- ปุ่มทดสอบวาร์ป (สำคัญมาก!)
-StrongholdTab:CreateButton({
-    Name = "🧪 ทดสอบวาร์ป (กดตอนเจอ SH)",
-    Callback = function()
-        ManualTeleport()
-    end
-})
-
--- ฟังก์ชันวาร์ปที่เสถียร 100%
-function ManualTeleport()
-    if not LastStronghold then
-        Rayfield:Notify({Title = "❌", Content = "ยังไม่เจอ Stronghold", Duration = 3})
-        return
-    end
-
-    print("🔥 เริ่มวาร์ป Stronghold:", LastStronghold.Name)
-
-    -- หาตำแหน่งปลอดภัยหลายวิธี
-    local targetPos
-    local func = LastStronghold:FindFirstChild("Functional")
-
-    -- วิธี 1: PrimaryPart
-    if LastStronghold.PrimaryPart then
-        targetPos = LastStronghold.PrimaryPart.CFrame + Vector3.new(0, 15, 10)
-    end
-
-    -- วิธี 2: Functional.Position (สำรอง)
-    if func and not targetPos then
-        targetPos = CFrame.new(func.Position + Vector3.new(0, 20, 15))
-    end
-
-    -- วิธี 3: หา Part ใหญ่สุด
-    if not targetPos then
-        for _, part in pairs(LastStronghold:GetChildren()) do
-            if part:IsA("BasePart") and part.Size.Magnitude > 10 then
-                targetPos = part.CFrame + Vector3.new(0, 15, 10)
-                break
-            end
-        end
-    end
-
-    if not targetPos then
-        Rayfield:Notify({Title = "❌", Content = "หาตำแหน่งไม่ได้", Duration = 3})
-        return
-    end
-
-    -- รอ Character พร้อม
-    local player = game.Players.LocalPlayer
-    local char = player.Character or player.CharacterAdded:Wait()
-    local root = char:WaitForChild("HumanoidRootPart", 5)
-
-    if root then
-        -- วาร์ปแบบเนียน
-        root.CFrame = targetPos
-        Rayfield:Notify({
-            Title = "🚀 วาร์ปสำเร็จ!",
-            Content = "ไป Stronghold แล้ว! 🎉",
-            Duration = 4
-        })
-        print("✅ วาร์ปสำเร็จ:", targetPos.Position)
-    else
-        Rayfield:Notify({Title = "❌", Content = "Character ไม่พร้อม", Duration = 3})
-    end
-end
-
--- ฟังก์ชันอัปเดตหลัก
-local function UpdateStronghold()
-    if not CountdownEnabled then return end
-
-    local now = tick()
-    if now - LastUpdateTime < UPDATE_INTERVAL then return end
-    LastUpdateTime = now
-
-    local sh = nil
-
-    -- ค้นหา Stronghold
-    if LastStronghold and LastStronghold.Parent and LastStronghold:FindFirstChild("Functional") then
-        sh = LastStronghold
-    else
-        for _, obj in workspace:GetDescendants() do
-            if obj:IsA("Model") and obj:FindFirstChild("Functional") and obj:HasTag("Stronghold") and obj.Name ~= "AlienMothership" then
-                sh = obj
-                LastStronghold = sh
-                break
-            end
-        end
-    end
-
-    if not sh then
-        StatusLabel:Set("❌ ไม่พบ Stronghold")
-        InfoLabel:Set("รอ Stronghold เกิดใหม่...")
-        return
-    end
-
-    local func = sh.Functional
-    local openTime = func:GetAttribute("OpenTime")
-    local level = func:GetAttribute("Level") or 1
-
-    if not openTime then return end
-
-    local timeLeft = openTime - workspace:GetServerTimeNow()
-    local timeStr, statusText
-
-    -- ✅ ใช้ key กันวาร์ปรอบเดิม
-    local teleportKey = tostring(sh:GetDebugId()) .. "|" .. tostring(openTime)
-
-    -- 🔥 AUTO TELEPORT แค่ครั้งเดียวต่อรอบ
-    if timeLeft <= 0 and AutoTeleportEnabled then
-        statusText = "✅ เปิดแล้ว!"
-
-        if LastTeleportKey ~= teleportKey then
-            -- ยังไม่เคยวาร์ปรอบนี้ -> วาร์ปเลย
-            LastTeleportKey = teleportKey
-            timeStr = "🚀 กำลังวาร์ป..."
-
-            task.spawn(function()
-                ManualTeleport()
-            end)
-        else
-            -- วาร์ปไปแล้วรอบนี้
-            timeStr = "✅ วาร์ปแล้ว รอรอบถัดไป"
-        end
-    else
-        statusText = "⏳ รอเปิด"
-        local mins = math.floor(timeLeft / 60)
-        local secs = math.floor(timeLeft % 60)
-        if timeLeft <= 30 then
-            timeStr = string.format("%d", secs)
-        else
-            timeStr = string.format("%d:%02d", mins, secs)
-        end
-    end
-
-    -- อัปเดต UI
-    StatusLabel:Set("Stronghold Lv." .. level .. " | AutoTP: " .. (AutoTeleportEnabled and "✅" or "❌"))
-    InfoLabel:Set(string.format("ระดับ: %d\n%s\nเหลือ: %s", level, statusText, timeStr))
-    InfoLabel.TextColor3 = LevelColors[level] or Color3.fromRGB(255, 0, 0)
-end
-
--- ลูปหลัก
-game:GetService("RunService").Heartbeat:Connect(function()
-    pcall(UpdateStronghold)
-end)
-
-UpdateStronghold()
-
-Rayfield:Notify({
-    Title = "🔥 Stronghold Auto TP พร้อม!",
-    Content = "เจอ SH แล้วกด '🧪 ทดสอบวาร์ป' ทดสอบก่อนได้",
-    Duration = 6
-})
-
--- แค่ Tab เดียว | ไม่โหลด Rayfield ใหม่ | 57 ชิ้นล่าสุด
-
-local Tab = Window:CreateTab("ดึงของ")
-
+-- === Drag Items (EZ) + Quantity (Simple UI) ===
 local cloneref = cloneref or function(x) return x end
-local Players = cloneref(game:GetService("Players"))
-local Workspace = cloneref(game:GetService("Workspace"))
-local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
-local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
-local hrp = character:WaitForChild("HumanoidRootPart")
 
+-- Services & refs
+local Players          = cloneref(game:GetService("Players"))
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+local Workspace        = cloneref(game:GetService("Workspace"))
+local RunService       = game:GetService("RunService")
+
+local player    = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp       = character:WaitForChild("HumanoidRootPart")
+
+local itemsFolder  = Workspace:WaitForChild("Items")
 local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
 local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem")
-local stopDragging = remoteEvents:WaitForChild("StopDraggingItem")
+local stopDragging  = remoteEvents:WaitForChild("StopDraggingItem")
 
-local offsetDistance = 3
-local dragDelay = 0.03
+-- ตั้งค่าเบื้องต้น
+local offsetDistance = 2       -- วางของไว้หน้าตัวละครกี่สตู
+local perItemDelay   = 0       -- เวอร์ชันง่าย: ลากรัว ๆ ไม่ต้องตั้งค่าใน UI
 
--- รายชื่อ 57 ชิ้นล่าสุด (เรียง A→Z)
-local itemList = {
- "Air Rifle","Alpha Wolf Pelt","Anvil Back","Anvil Base","Anvil Front","Apple","Bandage","Basketball","Bear Corpse","Bear Pelt","Berry","Bolt","Broken Fan","Broken Microwave","Bunny Foot","Cake","Carnival Basketball","Carnival Ring","Carrot","Chair","Coal","Coin Stack","Cooked Morsel","Crossbow Cultist","Cultist","Cultist Gem","Cultist Prototype","Defense Blueprint","Fuel Canister","Gem of the Forest Fragment","Giant Sack","Good Axe","Halloween Chest1","Infernal Sack","Iron Body","Item Chest","Item Chest2","Item Chest3","Item Chest4","Item Chest5","Item Chest6","Leather Body","Log","MedKit","Morsel","Oil Barrel","Old Car Engine","Old Flashlight","Old Radio","Old Rod","Old Taming Flute","Potion","Purple Fur Tuft","Revolver","Revolver Ammo","Rifle","Rifle Ammo","Scorpion Shell","Seed Box","Sheet Metal","Steak","Strong Axe","Strong Flashlight","Stronghold Diamond Chest","Tactical Shotgun","Thorn Body","Tyre","Volcanic Chest1","Volcanic Chest2","Washing Machine","Wolf Corpse"
- }
+-- helper: Rayfield dropdown บางเวอร์ชันคืน table
+local function asString(opt)
+    if type(opt) == "table" then return tostring(opt[1]) end
+    return tostring(opt)
+end
 
-local function dragItem(item)
-    if not (item and item.Parent) then return false end
-    local clone = cloneref(item)
-    startDragging:FireServer(clone)
-    task.wait(0.03)
-    local pos = (hrp.CFrame * CFrame.new(0, 0, -offsetDistance)).Position
-    task.spawn(function()
-        if clone:IsA("BasePart") then clone.CFrame = CFrame.new(pos)
-        elseif clone:IsA("Model") and clone.PrimaryPart then clone:SetPrimaryPartCFrame(CFrame.new(pos)) end
+-- รวบรวมชื่อทุกไอเทม เรียง A→Z
+local function getSortedItemNames()
+    local seen = {}
+    for _, it in ipairs(itemsFolder:GetChildren()) do
+        if it and it.Name then
+            seen[it.Name] = true
+        end
+    end
+
+    local names = {}
+    for n in pairs(seen) do
+        table.insert(names, n)
+    end
+
+    table.sort(names, function(a, b)
+        return string.lower(a) < string.lower(b)
     end)
+
+    if #names == 0 then
+        names = {"(ไม่มีไอเทมใน Items)"}
+    end
+
+    return names
+end
+
+-- หา “หลายชิ้น” ตามชื่อ (หยิบได้สูงสุด maxCount)
+local function findItemsByName(name, maxCount)
+    local list = {}
+    for _, it in ipairs(itemsFolder:GetChildren()) do
+        if it.Name == name then
+            table.insert(list, it)
+            if #list >= maxCount then
+                break
+            end
+        end
+    end
+    return list
+end
+
+-- ลากของ 1 ชิ้นมาหน้าเรา
+local function dragOne(item)
+    if not (item and item.Parent) then return false end
+
+    local cloned = cloneref(item)
+
+    startDragging:FireServer(cloned)
+    RunService.Heartbeat:Wait() -- เผื่อให้สถานะลากเซิร์ฟเวอร์เซ็ตทัน
+
+    local pos = (hrp.CFrame * CFrame.new(0, 0, -offsetDistance)).Position
+
+    task.spawn(function()
+        if cloned:IsA("BasePart") then
+            cloned.CFrame = CFrame.new(pos)
+        elseif cloned:IsA("Model") and cloned.PrimaryPart then
+            cloned:SetPrimaryPartCFrame(CFrame.new(pos))
+        end
+    end)
+
     task.wait(0.05)
-    stopDragging:FireServer(clone)
-    task.wait(dragDelay)
+    stopDragging:FireServer(cloned)
     return true
 end
 
-local function getItems(name, max)
-    local t = {}
-    for _, v in ipairs(Workspace.Items:GetChildren()) do
-        if v.Name == name then
-            table.insert(t, v)
-            if #t >= max then break end
+-- ===== UI =====
+local tab = Window:CreateTab("ดึงของเข้าตัว", 0)
+
+-- 1) Dropdown รายชื่อไอเทม
+local options  = getSortedItemNames()
+local selected = asString(options[1])
+if selected == "(ไม่มีไอเทมใน Items)" then
+    selected = nil
+end
+
+local dropdown = tab:CreateDropdown({
+    Name = "เลือกไอเทม (ทั้งหมด เรียง A→Z)",
+    Options = options,
+    CurrentOption = options[1],
+    Multiple = false,
+    Callback = function(opt)
+        selected = asString(opt)
+        if selected == "(ไม่มีไอเทมใน Items)" then
+            selected = nil
         end
     end
-    return t
-end
-
--- Slider จำนวน
-local amount = 10
-Tab:CreateSlider({
-    Name = "จำนวนต่อชนิด",
-    Range = {1, 500},
-    Increment = 1,
-    CurrentValue = 10,
-    Callback = function(v) amount = v end
 })
 
--- ปุ่มไอเทมทั้ง 57 ชิ้น (เรียง 4 คอลัมน์)
-for i = 1, #itemList, 4 do
-    for j = i, math.min(i+3, #itemList) do
-        local name = itemList[j]
-        Tab:CreateButton({
-            Name = name,
-            Callback = function()
-                local found = getItems(name, amount)
-                if #found == 0 then
-                    Rayfield:Notify({Title="ไม่พบ", Content=name.." ไม่มีในแมพ", Duration=3})
-                    return
-                end
-                local c = 0
-                for _, it in found do
-                    if dragItem(it) then c += 1 end
-                end
-                Rayfield:Notify({Title="สำเร็จ", Content="ดึง "..name.." x"..c, Duration=3})
-            end
+-- 2) ปุ่มรีเฟรชรายชื่อ
+tab:CreateButton({
+    Name = "รีเฟรชรายชื่อ",
+    Callback = function()
+        options = getSortedItemNames()
+
+        -- ใช้ Refresh ให้ถูกกับ Rayfield
+        dropdown:Refresh(options, true)
+
+        selected = asString(options[1])
+        if selected == "(ไม่มีไอเทมใน Items)" then
+            selected = nil
+        else
+            dropdown:Set(options[1])
+        end
+
+        Rayfield:Notify({
+            Title   = "อัปเดตแล้ว",
+            Content = "รีเฟรชรายการสำเร็จ",
+            Duration = 2
         })
     end
-end
+})
 
--- อัปเดต HRP
-player.CharacterAdded:Connect(function(c)
-    character = c
-    hrp = c:WaitForChild("HumanoidRootPart")
+-- 3) ระบุจำนวน (ใช้ Slider ง่าย ๆ)
+local currentQty = 10
+tab:CreateSlider({
+    Name = "จำนวนที่จะดึง",
+    Range = {1, 500},       -- เพดาน 500 ให้ดูไม่โหดเกิน (ปรับได้)
+    Increment = 1,
+    CurrentValue = currentQty,
+    Callback = function(v)
+        currentQty = v
+    end
+})
+
+-- 4) ปุ่มดึงตามจำนวน
+tab:CreateButton({
+    Name = "ดึงตามจำนวน",
+    Callback = function()
+        if not selected then
+            Rayfield:Notify({
+                Title = "ยังไม่มีของ",
+                Content = "กรุณาเลือกไอเทมก่อน",
+                Duration = 2
+            })
+            return
+        end
+
+        local want    = currentQty or 1
+        local targets = findItemsByName(selected, want)
+
+        if #targets == 0 then
+            Rayfield:Notify({
+                Title = "ไม่พบ",
+                Content = "ไม่มี " .. selected .. " ให้ดึง",
+                Duration = 2
+            })
+            return
+        end
+
+        local dragged = 0
+        for _, it in ipairs(targets) do
+            if dragOne(it) then
+                dragged += 1
+            end
+            if perItemDelay > 0 then
+                task.wait(perItemDelay)
+            end
+        end
+
+        Rayfield:Notify({
+            Title = "สำเร็จ",
+            Content = "ดึง " .. selected .. " มาแล้ว " .. tostring(dragged) .. " ชิ้น",
+            Duration = 3
+        })
+    end
+})
+
+-- อัปเดต HRP เมื่อรีสปอน
+player.CharacterAdded:Connect(function(char)
+    character = char
+    hrp = character:WaitForChild("HumanoidRootPart")
 end)
-
-Rayfield:Notify({Title="โหลด Tab สำเร็จ", Content="57 ชิ้นล่าสุด พร้อมใช้!", Duration=5})
 
 -- === แท็บใหม่: ฟังก์ชันเสริม ===
 local miscTab = Window:CreateTab("ฟังก์ชันเสริม")
