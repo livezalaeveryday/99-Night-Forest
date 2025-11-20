@@ -7,7 +7,7 @@ local Window = Rayfield:CreateWindow({
    LoadingTitle = "ยินดีต้อนรับ Power Panel v2.0 สคริปต์ของไลฟ์สาระ ไปวันๆ",
    LoadingSubtitle = "power panel team",
    ShowText = "Rayfield",
-   Theme = "Bloom",
+   Theme = "DarkBlue",
    ToggleUIKeybind = "K",
    DisableRayfieldPrompts = true,
    DisableBuildWarnings = true,
@@ -89,13 +89,210 @@ end
 
 -- === แท็บตัวละคร ===
 local MainTab = Window:CreateTab("ใช้บ่อย")
-MainTab:CreateButton({Name = "GOD MODE", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))() end})
-MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
-MainTab:CreateButton({Name = "เติมไฟ", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))() end})
-MainTab:CreateButton({Name = "ดึงยาเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))() end})
-MainTab:CreateButton({Name = "ดึงเหล็กเข้าตัว", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))() end})
+local UserInputService = game:GetService("UserInputService")
+local godmodeToggled = false
+
+MainTab:CreateButton({Name = "อมตะ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "Godmode Active",Duration = 3})end})
+MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 0, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
+MainTab:CreateButton({Name = "เติมไฟ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมไฟเรียบร้อย",Duration = 3})end})
+MainTab:CreateButton({Name = "เติมยา",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมอาหารเรียบร้อย",Duration = 3})end})
+MainTab:CreateButton({Name = "เติมเครื่องบด",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เครื่องบด",Duration = 3})end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
-local flySlider = MainTab:CreateSlider({Name="ความเร็วบิน", Range={1,200}, Increment=200, Suffix=" Speed", CurrentValue=200, Flag="FlySpeed", Callback=function(val) flySpeed=val end})
+MainTab:CreateButton({
+    Name = "🔥 ปิดหมอกถาวร",
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        
+        -- ตั้งค่า Fog ให้หายไป (visibility 100000 studs)
+        Lighting.FogEnd = 100000
+        Lighting.FogStart = 0  -- เริ่มหมอกไกลสุด
+        
+        -- ลบ Atmosphere ถ้ามี (จะ disable fog อัตโนมัติ)
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("Atmosphere") then
+                v:Destroy()
+            end
+        end
+        
+        -- ป้องกันเกมเซ็ตค่ากลับ (ถาวร 100%)
+        Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+            Lighting.FogEnd = 100000
+        end)
+        Lighting.DescendantAdded:Connect(function(v)
+            if v:IsA("Atmosphere") then
+                v:Destroy()
+            end
+        end)
+        
+        Rayfield:Notify({
+            Title = "ปิดหมอกสำเร็จ! 🔥",
+            Content = "มองเห็นไกลสุดขีด ถาวรไม่กลับมา",
+            Duration = 4
+        })
+    end
+})
+
+-- ปุ่มอมตะแบบ Keybind (กด Numpad1 เพื่อเปิด Godmode)
+MainTab:CreateKeybind({
+    Name = "อมตะ (Godmode)",
+    CurrentKeybind = "KeypadOne",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()
+        
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "อมตะเปิดใช้งาน!",
+            Content = "Godmode Active แล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+
+MainTab:CreateKeybind({
+    Name = "หนีกลับบ้าน (Hotkey)",
+    CurrentKeybind = "KeypadTwo",  -- หรือ "Numpad2" ก็ได้
+    HoldToInteract = false,        -- false = กดครั้งเดียวทำงาน, true = ต้องกดค้าง
+    Callback = function()
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        hrp.CFrame = CFrame.new(12.079488, 0, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)
+        Rayfield:Notify({
+            Title = "หนีกลับบ้าน",
+            Content = "ถึงแล้ว",
+            Duration = 2,
+            Image = 13014647359
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "เติมไฟ",
+    CurrentKeybind = "KeypadThree",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))()
+
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "สำเร็จ!",
+            Content = "เติมไฟแล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "เติมยา",
+    CurrentKeybind = "KeypadFour",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))()
+
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "สำเร็จ!",
+            Content = "เติมยาแล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "เติมเครื่องบด",
+    CurrentKeybind = "KeypadFive",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))()
+
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "สำเร็จ!",
+            Content = "เติมเครื่องบดแล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+
+-- Toggle การบิน (Flag = "FlyToggle")
+local flyToggle = MainTab:CreateToggle({
+    Name = "เปิด/ปิด การบิน",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(val)
+        if val then
+            startFlying()
+        else
+            stopFlying()
+        end
+    end
+})
+
+-- Hotkey สำหรับ Toggle การบิน (กด Numpad3 เพื่อเปิด/ปิด)
+MainTab:CreateKeybind({
+    Name = "การบิน (Hotkey)",
+    CurrentKeybind = "KeypadSix",  -- หรือ "Numpad3"
+    HoldToInteract = false,          -- กดครั้งเดียว Toggle
+    Callback = function()
+        -- Toggle ค่า FlyToggle (จาก false เป็น true หรือ true เป็น false)
+        local newValue = not flyToggle.CurrentValue
+        flyToggle:Set(newValue)  -- Set ค่าใหม่ (จะเรียก Callback อัตโนมัติ)
+        
+        Rayfield:Notify({
+            Title = "การบิน",
+            Content = newValue and "เปิดแล้ว (กด Numpad3)" or "ปิดแล้ว (กด Numpad3)",
+            Duration = 2,
+            Image = 13014647359
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "ปิดหมอกถาวร (Hotkey)",
+    CurrentKeybind = "KeypadSeven",  -- หรือ "Numpad4"
+    HoldToInteract = false,         -- กดครั้งเดียวทำงาน
+    Callback = function()
+        local Lighting = game:GetService("Lighting")
+        
+        -- ตั้งค่า Fog ให้หายไป (visibility 100000 studs)
+        Lighting.FogEnd = 100000
+        Lighting.FogStart = 0
+        
+        -- ลบ Atmosphere ถ้ามี
+        for _, v in pairs(Lighting:GetDescendants()) do
+            if v:IsA("Atmosphere") then
+                v:Destroy()
+            end
+        end
+        
+        -- ป้องกันเกมเซ็ตค่ากลับ (ถาวร)
+        Lighting:GetPropertyChangedSignal("FogEnd"):Connect(function()
+            Lighting.FogEnd = 100000
+        end)
+        Lighting.DescendantAdded:Connect(function(v)
+            if v:IsA("Atmosphere") then
+                v:Destroy()
+            end
+        end)
+        
+        Rayfield:Notify({
+            Title = "ปิดหมอกสำเร็จ! 🔥",
+            Content = "มองเห็นไกลสุดขีด (กด Numpad4)",
+            Duration = 3,
+            Image = 13014647359
+        })
+    end
+})
 
 -- === แท็บวาป + ลากศพ (เวอร์ชันแยกหน้าที่เรียบร้อย) ===
 local Players = game:GetService("Players")
@@ -254,6 +451,168 @@ friendTab:CreateButton({
     end
 })
 
+-- Hotkey สำหรับลากศพทั้งหมด (กด Numpad5)
+MainTab:CreateKeybind({  -- หรือ friendTab ถ้าอยากให้อยู่ในแท็บเดียวกัน
+    Name = "ลากศพทั้งหมด (Hotkey)",
+    CurrentKeybind = "KeypadEight",  -- หรือ "Numpad5"
+    HoldToInteract = false,         -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- เตรียมตัวเรา
+        local char = player.Character or player.CharacterAdded:Wait()
+        local hrp = char:WaitForChild("HumanoidRootPart")
+        -- เตรียม RemoteEvents
+        local remoteEvents = ReplicatedStorage:FindFirstChild("RemoteEvents")
+        local startDragging = remoteEvents and remoteEvents:FindFirstChild("RequestStartDraggingItem")
+        local stopDragging  = remoteEvents and remoteEvents:FindFirstChild("StopDraggingItem")
+        if not (startDragging and stopDragging) then
+            Rayfield:Notify({Title = "ผิดพลาด", Content = "ไม่พบ RemoteEvent ลากศพ", Duration = 5})
+            return
+        end
+        -- หา "ศพทั้งหมด"
+        local bodies = getAllBodies()
+        if #bodies == 0 then
+            Rayfield:Notify({Title = "ไม่พบศพ", Content = "ตอนนี้ยังไม่มีใครตาย", Duration = 4})
+            return
+        end
+        Rayfield:Notify({Title = "กำลังลากศพ", Content = "พบ "..#bodies.." ตัว (กด Numpad5)", Duration = 3})
+        task.spawn(function()
+            for _, body in ipairs(bodies) do
+                -- กันกรณีออบเจ็กต์หายระหว่างทาง
+                if body and body.Parent then
+                    local inst = (typeof(cloneref) == "function") and cloneref(body) or body
+                    startDragging:FireServer(inst)
+                    task.wait(0.02)
+                    -- เลือกพาร์ทอ้างอิงเพื่อวางให้ใกล้ตัวเรา
+                    local refPart = findAnyBasePart(body)
+                    if refPart then
+                        -- ใช้ PivotTo ให้ทั้งโมเดลเลื่อนมาหน้าเรา
+                        body:PivotTo(hrp.CFrame * CFrame.new(0, 0, -DragOffset))
+                    end
+                    task.wait(0.05)
+                    stopDragging:FireServer(inst)
+                    task.wait(DragDelay)
+                end
+            end
+            Rayfield:Notify({Title = "สำเร็จ! 💀", Content = "ลากศพทั้งหมด "..#bodies.." ตัว!", Duration = 4})
+        end)
+    end
+})
+
+
+
+-- === แท็บวาปสถานที่ ===
+local tpTab = Window:CreateTab("วาปไปที่ต่างๆ")
+
+-- ตัวแปรเก็บปุ่มเพื่อลบตอนรีเฟรช
+local currentButtons = {}
+local locationLabel
+
+-- ประกาศ player ก่อนใช้
+local player = game.Players.LocalPlayer
+
+-- เก็บ Locations ไว้นอกฟังก์ชัน (สำคัญมาก!)
+local Locations = {}
+
+-- ชื่อภาษาไทย
+local thaiNames = {
+    StrongHold = "ปราสาทเพชร",
+    Fairy_House = "บ้านนางฟ้า", 
+    Ice_Temple = "วิหารน้ำแข็ง",
+    Jail_Cellar1 = "ห้องขังใต้ดิน 1",
+    Jail_Cellar2 = "ห้องขังใต้ดิน 2", 
+    Jail_Cellar3 = "ห้องขังใต้ดิน 3",
+    Jail_Cellar4 = "ห้องขังใต้ดิน 4",
+    SkillsBuilding = "อาคารฝึกสกิล",
+    Snow_Clothing_Shop = "ร้านเสื้อผ้าหิมะ",
+    ToolWorkshop = "โรงงานเครื่องมือ"
+}
+
+-- ฟังก์ชันดึง CFrame จาก landmark
+local function getCFrameFromLandmark(landmark)
+    if landmark:IsA("Model") then
+        if landmark.PrimaryPart then
+            return landmark.PrimaryPart.CFrame
+        else
+            for _, part in pairs(landmark:GetChildren()) do
+                if part:IsA("BasePart") then
+                    return part.CFrame
+                end
+            end
+        end
+    elseif landmark:IsA("BasePart") then
+        return landmark.CFrame
+    end
+    return nil
+end
+
+-- ฟังก์ชันรีเฟรชสถานที่
+local function refreshLocations()
+    -- ลบปุ่มเก่า
+    for _, btn in pairs(currentButtons) do
+        if btn.Remove then btn:Remove() end
+    end
+    currentButtons = {}
+
+    -- รีเซ็ต Locations
+    Locations = {}
+
+    local folder = Workspace:FindFirstChild("Map") and Workspace.Map:FindFirstChild("Landmarks")
+    
+    if folder then
+        for _, landmark in pairs(folder:GetChildren()) do
+            local name = landmark.Name
+            local cf = getCFrameFromLandmark(landmark)
+            
+            if cf then
+                local pos = cf.Position
+                local displayName = thaiNames[name] or name:gsub("_", " ")
+                Locations[name] = {
+                    CFrame = CFrame.new(pos.X, pos.Y + 3, pos.Z), -- +3 เพื่อไม่ติดพื้น
+                    Display = displayName
+                }
+            end
+        end
+    end
+    
+    -- สร้างปุ่มใหม่
+    for key, data in pairs(Locations) do
+        local btn = tpTab:CreateButton({
+            Name = "📍 " .. data.Display,
+            Callback = function()
+                local char = player.Character or player.CharacterAdded:Wait()
+                local hrp = char:WaitForChild("HumanoidRootPart")
+                hrp.CFrame = data.CFrame
+                Rayfield:Notify({
+                    Title = "วาปสำเร็จ! 🚀",
+                    Content = "ไป " .. data.Display .. " แล้ว",
+                    Duration = 3,
+                    Image = 13014647359
+                })
+            end
+        })
+        table.insert(currentButtons, btn)
+    end
+    
+    -- อัพเดท Label
+    if locationLabel then locationLabel:Remove() end
+    locationLabel = tpTab:CreateLabel("📍 พบสถานที่: " .. #Locations .. " ที่")
+    
+    Rayfield:Notify({
+        Title = "รีเฟรชสำเร็จ!",
+        Content = "พบ " .. #Locations .. " สถานที่",
+        Duration = 4
+    })
+end
+
+-- ปุ่มรีเฟรช
+tpTab:CreateButton({
+    Name = "🔄 รีเฟรชพิกัดทั้งหมด",
+    Callback = refreshLocations
+})
+
+-- รันครั้งแรกตอนเปิดสคริปต์
+refreshLocations()
+
 -- ปุ่มรีเฟรชรายชื่อ (มีผลเฉพาะ dropdown วาปเพื่อน)
 friendTab:CreateButton({
     Name = "รีเฟรชรายชื่อ",
@@ -263,57 +622,792 @@ friendTab:CreateButton({
     end
 })
 
--- อัปเดต Dropdown อัตโนมัติ เมื่อมีคนเข้า/ออก (เฉพาะวาปเพื่อน)
-Players.PlayerAdded:Connect(function()
-    friendDropdown:Set(getPlayerList())
-end)
-Players.PlayerRemoving:Connect(function()
-    friendDropdown:Set(getPlayerList())
-end)
+-- === แท็บ Kill Aura สุดโหด (15 อาวุธ + Attack Speed) ===
+local killAuraTab = Window:CreateTab("คิล ออร่า")
 
--- === แท็บใหม่: วาปสถานที่ ===
-local tpTab = Window:CreateTab("วาปไปที่ต่างๆ")
+-- ตัวแปร Kill Aura
+local killAuraEnabled = false
+local killAuraRange = 150
+local killAuraCount = 0
+local killAuraHitDelay = 0  -- Delay เริ่มต้น (ยิ่งน้อย = ตีเร็ว)
+local Characters = Workspace:WaitForChild("Characters")
 
--- ตารางพิกัด (key = ชื่อในโค้ด, value = พิกัด + ชื่อปุ่มสวย ๆ)
-local Locations = {
-    Terrain     = { CFrame = CFrame.new(12.079488, 48.5, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0),       Display = "แคมป์ไฟ (จุดเกิด)" },
-    -- เพิ่มกี่ที่ก็ได้ตรงนี้
+-- รายการอาวุธทั้งหมด (15 ชิ้น)
+local allWeapons = {
+    "Scythe", "Spear", "Infernal Sword", "Morningstar", "Katana", "Laser Sword", "Ice Sword",
+    "Trident", "Poison Spear", "Infernal Sword", "Cultist King Mace",
+    "Obsidiron Hammer", "Scythe", "Vampire Scythe", "Old Axe", "Strong Axe", "Good Axe"
 }
 
--- ฟังก์ชันวาป (ใช้ซ้ำทุกปุ่ม)
-local function teleportTo(data)
-    local char = player.Character or player.CharacterAdded:Wait()
-    local hrp = char:WaitForChild("HumanoidRootPart")
-    hrp.CFrame = data.CFrame
-    Rayfield:Notify({
-        Title = "วาปสำเร็จ!",
-        Content = "ไป "..data.Display.." แล้ว",
-        Duration = 3,
-        Image = 13014647359
-    })
+-- ฟังก์ชันหา Weapon (Priority)
+local function getWeapon()
+    if not player:FindFirstChild("Inventory") then return nil end
+    
+    local priorityWeapons = {"Scythe", "Infernal Sword", "Strong Axe", "Good Axe", "Vampire Scythe", "Laser Sword", "Infernal Sword", "Ice Sword", "Poison Spear","Katana", "Spear", "Trident", "Scythe", "Morningstar", "Old Axe", "Cultist King Mace"}
+    local normalWeapons = {"Obsidiron Hammer"}
+    
+    for _, weaponName in ipairs(priorityWeapons) do
+        local weapon = player.Inventory:FindFirstChild(weaponName)
+        if weapon then return weapon end
+    end
+    
+    for _, weaponName in ipairs(normalWeapons) do
+        local weapon = player.Inventory:FindFirstChild(weaponName)
+        if weapon then return weapon end
+    end
+    
+    return nil
 end
 
--- === สร้างปุ่มอัตโนมัติจากตาราง Locations (แก้จุดผิดพลาดตรงนี้) ===
-for key, data in pairs(Locations) do
-    tpTab:CreateButton({
-        Name = data.Display,
-        Callback = function()
-            teleportTo(data)
+-- ฟังก์ชันส่งดาเมจ
+local function damage(target, tool)
+    if not tool then return end
+    local remoteEvents = ReplicatedStorage:FindFirstChild("RemoteEvents")
+    if not remoteEvents then return end
+    local evt = remoteEvents:FindFirstChild("ToolDamageObject")
+    if not evt then return end
+    
+    local hrp = target:FindFirstChild("HumanoidRootPart")
+    local cf = hrp and hrp.CFrame or CFrame.new()
+    
+    evt:InvokeServer(target, tool, tostring(killAuraCount).."_7367831688", cf)
+end
+
+-- Toggle Kill Aura
+killAuraTab:CreateToggle({
+    Name = "🔥 เปิด/ปิด Kill Aura",
+    CurrentValue = false,
+    Flag = "KillAuraToggle",
+    Callback = function(bool)
+        killAuraEnabled = bool
+        Rayfield:Notify({
+            Title = "Kill Aura",
+            Content = bool and "⚔️ เปิด - ตีเร็วสุด!" or "❌ ปิดแล้ว",
+            Duration = 3,
+            Image = 6026568198
+        })
+    end,
+})
+
+-- **🚀 SLIDER ปรับความเร็วตี (ใหม่!)**
+killAuraTab:CreateSlider({
+    Name = "⚡ ความเร็วตี (ต่ำ=เร็ว)",
+    Range = {0, 0.5},
+    Increment = 0.1,
+    CurrentValue = 0,
+    Flag = "HitSpeedSlider",
+    Callback = function(val)
+        killAuraHitDelay = val
+        Rayfield:Notify({
+            Title = "ปรับความเร็วตี",
+            Content = "Delay: " .. val .. "s (ยิ่งต่ำยิ่งเร็ว)",
+            Duration = 2
+        })
+    end,
+})
+
+-- Dropdown โหมดอาวุธ
+local weaponModes = {"Auto (Priority)", "Good Axe Only", "Vampire Scythe Only", "Laser Sword Only", "All Weapons (Random)"}
+local selectedMode = "Auto (Priority)"
+killAuraTab:CreateDropdown({
+    Name = "โหมดอาวุธ",
+    Options = weaponModes,
+    CurrentOption = {selectedMode},
+    Flag = "WeaponMode",
+    Callback = function(option)
+        selectedMode = option[1]
+    end,
+})
+
+-- Slider ระยะ
+killAuraTab:CreateSlider({
+    Name = "ระยะ Kill Aura (Studs)",
+    Range = {50, 100},
+    Increment = 5,
+    CurrentValue = 100,
+    Flag = "KillAuraRange",
+    Callback = function(val)
+        killAuraRange = val
+    end,
+})
+
+-- Label สถิติ
+local statusLabel = killAuraTab:CreateLabel("Kills: 0 | Range: 150 | Speed: 0.03s | Weapon: Ready")
+
+-- Reset Stats
+killAuraTab:CreateButton({
+    Name = "🔄 Reset Stats",
+    Callback = function()
+        killAuraCount = 0
+        statusLabel:Set("Kills: 0 | Range: " .. killAuraRange .. " | Speed: " .. killAuraHitDelay .. "s | Weapon: Ready")
+    end,
+})
+
+-- ตรวจสอบ Inventory
+killAuraTab:CreateButton({
+    Name = "📋 ตรวจสอบ Inventory (15 อาวุธ)",
+    Callback = function()
+        local inv = player:FindFirstChild("Inventory")
+        if not inv then return Rayfield:Notify({Title="❌ Error", Content="ไม่พบ Inventory", Duration=3}) end
+        
+        local found = 0
+        for _, wName in ipairs(allWeapons) do
+            if inv:FindFirstChild(wName) then found += 1 end
         end
-    })
-end -- <<< อย่าลืม end ตรงนี้!!!
+        
+        Rayfield:Notify({
+            Title = "Inventory Scan",
+            Content = "พบ " .. found .. "/15 อาวุธ",
+            Duration = 4
+        })
+    end,
+})
+
+-- === Kill Aura Loop (ปรับ Speed แล้ว) ===
+task.spawn(function()
+    while task.wait() do
+        if not killAuraEnabled then 
+            statusLabel:Set("Kills: " .. killAuraCount .. " | Range: " .. killAuraRange .. " | OFF")
+            task.wait(0.5)  -- ลด load เมื่อปิด
+            continue 
+        end
+        
+        local weapon
+        if selectedMode == "Auto (Priority)" then
+            weapon = getWeapon()
+        elseif selectedMode == "All Weapons (Random)" then
+            local available = {}
+            for _, wName in ipairs(allWeapons) do
+                local w = player.Inventory:FindFirstChild(wName)
+                if w then table.insert(available, w) end
+            end
+            if #available > 0 then weapon = available[math.random(1, #available)] end
+        else
+            local targetName = selectedMode:match("Only") and selectedMode:gsub(" Only", "")
+            weapon = player.Inventory:FindFirstChild(targetName)
+        end
+        
+        local myChar = player.Character
+        if not myChar or not myChar:FindFirstChild("HumanoidRootPart") or not weapon then 
+            statusLabel:Set("Kills: " .. killAuraCount .. " | ❌ ไม่พบอาวุธ")
+            continue 
+        end
+        
+        local myHRP = myChar.HumanoidRootPart
+        statusLabel:Set("Kills: " .. killAuraCount .. " | Range: " .. killAuraRange .. " | Speed: " .. killAuraHitDelay .. "s | " .. weapon.Name)
+        
+        -- Loop ตี (ใช้ delay ใหม่)
+        for _, v in ipairs(Characters:GetChildren()) do
+            if v:IsA("Model") and v ~= myChar and v:FindFirstChild("HumanoidRootPart") and not v.Name:find(" Body") then
+                local dist = (v.HumanoidRootPart.Position - myHRP.Position).Magnitude
+                if dist <= killAuraRange then
+                    killAuraCount += 1
+                    damage(v, weapon)
+                    statusLabel:Set("Kills: " .. killAuraCount .. " | ⚔️ ATTACKING")
+                    task.wait(killAuraHitDelay)  -- <<<< ที่นี่! ปรับความเร็วตี
+                end
+            end
+        end
+    end
+end)
+
+-- Auto Equip
+killAuraTab:CreateToggle({
+    Name = "🔧 Auto Equip",
+    CurrentValue = false,
+    Flag = "AutoEquip",
+    Callback = function(bool)
+        task.spawn(function()
+            while bool do
+                task.wait(0.5)
+                local weapon = getWeapon()
+                if weapon and player.Character then
+                    local humanoid = player.Character:FindFirstChild("Humanoid")
+                    if humanoid then humanoid:EquipTool(weapon) end
+                end
+            end
+        end)
+    end,
+})
+
+Rayfield:Notify({
+    Title = "✅ เพิ่ม Attack Speed!",
+    Content = "ปรับ '⚡ ความเร็วตี' ในเมนูได้เลย (0.01=เร็วสุด)",
+    Duration = 5,
+    Image = 6026568198
+})
+
+-- [ใส่ตรงส่วนบนสุดของสคริปต์]
+local Players = game:GetService("Players")
+local Workspace = game:GetService("Workspace")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local LocalPlayer = Players.LocalPlayer
+
+-- Chop Aura Variables
+local chopAuraToggle = false
+local auraRadius = 100          -- ค่าเริ่มต้น
+local chopDelay = 0.3           -- ความเร็วตี (วินาที)
+local currentAmount = 0
+
+local toolsDamageIDs = {
+    ["Old Axe"] = "3_7367831688",
+    ["Good Axe"] = "112_7367831688",
+    ["Strong Axe"] = "116_7367831688"
+}
+
+local function getAxeTool()
+    for toolName, _ in pairs(toolsDamageIDs) do
+        local tool = LocalPlayer:FindFirstChild("Inventory") and LocalPlayer.Inventory:FindFirstChild(toolName)
+        if tool then
+            return tool
+        end
+    end
+    return nil
+end
+
+local function equipTool(tool)
+    if tool then
+        pcall(function()
+            ReplicatedStorage.RemoteEvents.EquipItemHandle:FireServer("FireAllClients", tool)
+        end)
+    end
+end
+
+local function unequipTool(tool)
+    if tool then
+        pcall(function()
+            ReplicatedStorage.RemoteEvents.UnequipItemHandle:FireServer("FireAllClients", tool)
+        end)
+    end
+end
+
+-- Main Chop Aura Loop
+local function chopAuraLoop()
+    while chopAuraToggle do
+        task.wait(chopDelay)
+        local character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+        local hrp = character:FindFirstChild("HumanoidRootPart")
+        if not hrp then continue end
+
+        local tool = getAxeTool()
+        if not tool then 
+            task.wait(1)
+            continue 
+        end
+
+        equipTool(tool)
+
+        local trees = {}
+
+local function addTreesFromFolder(folder)
+    if not folder then return end
+    for _, obj in ipairs(folder:GetChildren()) do
+        if obj:IsA("Model") and (
+            obj:FindFirstChild("TreeClass") or  -- ต้นไม้หลักทั้งหมด
+            obj.Name == "Small Tree" or 
+            obj.Name == "Big Tree" or
+            obj.Name:find("Tree")  -- ชื่อมี Tree ด้วย
+        ) then
+            table.insert(trees, obj)
+        end
+    end
+end
+
+local map = Workspace:FindFirstChild("Map")
+if map then
+    addTreesFromFolder(map:FindFirstChild("Foliage"))
+    addTreesFromFolder(map:FindFirstChild("Landmarks"))
+end
+
+        for _, tree in ipairs(trees) do
+            if not chopAuraToggle then break end
+            local trunk = tree:FindFirstChild("Trunk")
+            if trunk and trunk:IsA("BasePart") then
+                local distance = (trunk.Position - hrp.Position).Magnitude
+                if distance <= auraRadius then
+                    currentAmount = currentAmount + 1
+                    task.spawn(function()
+                        while chopAuraToggle and tree and tree.Parent do
+                            pcall(function()
+                                ReplicatedStorage.RemoteEvents.ToolDamageObject:InvokeServer(
+                                    tree,
+                                    tool,
+                                    tostring(currentAmount) .. "_7367831688",
+                                    CFrame.new(-2.962610244751, 4.5547881126404, -75.950843811035,
+                                        0.89621275663376, -1.3894891459643e-08, 0.44362446665764,
+                                        -7.994568895775e-10, 1, 3.293635941759e-08,
+                                        -0.44362446665764, -2.9872644802253e-08, 0.89621275663376)
+                                )
+                            end)
+                            task.wait(chopDelay)
+                        end
+                    end)
+                end
+            end
+        end
+    end
+
+    -- เมื่อปิด Aura ให้ปลดอาวุธ
+    local tool = getAxeTool()
+    if tool then unequipTool(tool) end
+end
+
+-- สร้าง Tab ใหม่ใน Rayfield
+local ChopTab = Window:CreateTab("ตัดไม้") -- ไอคอนขวาน
+
+local Toggle = ChopTab:CreateToggle({
+    Name = "Enable Chop Aura",
+    CurrentValue = false,
+    Flag = "ChopAuraToggle",
+    Callback = function(Value)
+        chopAuraToggle = Value
+        if Value then
+            task.spawn(chopAuraLoop)
+            Notify("Chop Aura เปิดแล้ว!", 3)
+        else
+            Notify("Chop Aura ปิดแล้ว", 2)
+        end
+    end,
+})
+
+local RadiusSlider = ChopTab:CreateSlider({
+    Name = "ระยะตี (Studs)",
+    Range = {100, 100},
+    Increment = 10,
+    Suffix = " studs",
+    CurrentValue = auraRadius,
+    Flag = "ChopRadius",
+    Callback = function(Value)
+        auraRadius = Value
+    end,
+})
+
+local SpeedSlider = ChopTab:CreateSlider({
+    Name = "ความเร็วตี (เร็ว = เสี่ยงแบน)",
+    Range = {0.3, 0.3},
+    Increment = 0.05,
+    Suffix = "s",
+    CurrentValue = chopDelay,
+    Flag = "ChopSpeed",
+    Callback = function(Value)
+        chopDelay = Value
+    end,
+})
+
+
+
+
+-- ==============================
+-- STRONGHOLD AUTO TELEPORT (แก้ปัญหาไม่วาร์ป + กันวาร์ปรัว)
+-- ==============================
+local StrongholdTab = Window:CreateTab("ปราสาทเพชร")
+
+local LevelColors = {
+    [1] = Color3.fromRGB(195, 255, 0),
+    [2] = Color3.fromRGB(255, 238, 0),
+    [3] = Color3.fromRGB(255, 157, 0),
+    [4] = Color3.fromRGB(255, 64, 0),
+    [5] = Color3.fromRGB(255, 0, 0)
+}
+
+local LastStronghold = nil
+local LastUpdateTime = 0
+local UPDATE_INTERVAL = 0.3  -- เช็คถี่ขึ้น
+local CountdownEnabled = true
+local AutoTeleportEnabled = true
+local LastTeleportKey = nil   -- ✅ กันวาร์ปซ้ำในรอบเดียว
+
+local StatusLabel = StrongholdTab:CreateLabel("กำลังค้นหา Stronghold...")
+local InfoLabel = StrongholdTab:CreateLabel("ระดับ: -\nสถานะ: รอเปิด\nเหลือเวลา: --:--")
+
+-- Toggles
+StrongholdTab:CreateToggle({
+    Name = "เปิดใช้งาน Stronghold Countdown",
+    CurrentValue = false,
+    Callback = function(val)
+        CountdownEnabled = val
+    end
+})
+
+StrongholdTab:CreateToggle({
+    Name = "🚀 AUTO TELEPORT (วาร์ปทันที)",
+    CurrentValue = false,
+    Callback = function(val)
+        AutoTeleportEnabled = val
+    end
+})
+
+-- ปุ่มทดสอบวาร์ป (สำคัญมาก!)
+StrongholdTab:CreateButton({
+    Name = "🧪 ทดสอบวาร์ป (กดตอนเจอ SH)",
+    Callback = function()
+        ManualTeleport()
+    end
+})
+
+-- ฟังก์ชันวาร์ปที่เสถียร 100%
+function ManualTeleport()
+    if not LastStronghold then
+        Rayfield:Notify({Title = "❌", Content = "ยังไม่เจอ Stronghold", Duration = 3})
+        return
+    end
+
+    print("🔥 เริ่มวาร์ป Stronghold:", LastStronghold.Name)
+
+    -- หาตำแหน่งปลอดภัยหลายวิธี
+    local targetPos
+    local func = LastStronghold:FindFirstChild("Functional")
+
+    -- วิธี 1: PrimaryPart
+    if LastStronghold.PrimaryPart then
+        targetPos = LastStronghold.PrimaryPart.CFrame + Vector3.new(0, 15, 10)
+    end
+
+    -- วิธี 2: Functional.Position (สำรอง)
+    if func and not targetPos then
+        targetPos = CFrame.new(func.Position + Vector3.new(0, 20, 15))
+    end
+
+    -- วิธี 3: หา Part ใหญ่สุด
+    if not targetPos then
+        for _, part in pairs(LastStronghold:GetChildren()) do
+            if part:IsA("BasePart") and part.Size.Magnitude > 10 then
+                targetPos = part.CFrame + Vector3.new(0, 15, 10)
+                break
+            end
+        end
+    end
+
+    if not targetPos then
+        Rayfield:Notify({Title = "❌", Content = "หาตำแหน่งไม่ได้", Duration = 3})
+        return
+    end
+
+    -- รอ Character พร้อม
+    local player = game.Players.LocalPlayer
+    local char = player.Character or player.CharacterAdded:Wait()
+    local root = char:WaitForChild("HumanoidRootPart", 5)
+
+    if root then
+        -- วาร์ปแบบเนียน
+        root.CFrame = targetPos
+        Rayfield:Notify({
+            Title = "🚀 วาร์ปสำเร็จ!",
+            Content = "ไป Stronghold แล้ว! 🎉",
+            Duration = 4
+        })
+        print("✅ วาร์ปสำเร็จ:", targetPos.Position)
+    else
+        Rayfield:Notify({Title = "❌", Content = "Character ไม่พร้อม", Duration = 3})
+    end
+end
+
+-- ฟังก์ชันอัปเดตหลัก
+local function UpdateStronghold()
+    if not CountdownEnabled then return end
+
+    local now = tick()
+    if now - LastUpdateTime < UPDATE_INTERVAL then return end
+    LastUpdateTime = now
+
+    local sh = nil
+
+    -- ค้นหา Stronghold
+    if LastStronghold and LastStronghold.Parent and LastStronghold:FindFirstChild("Functional") then
+        sh = LastStronghold
+    else
+        for _, obj in workspace:GetDescendants() do
+            if obj:IsA("Model") and obj:FindFirstChild("Functional") and obj:HasTag("Stronghold") and obj.Name ~= "AlienMothership" then
+                sh = obj
+                LastStronghold = sh
+                break
+            end
+        end
+    end
+
+    if not sh then
+        StatusLabel:Set("❌ ไม่พบ Stronghold")
+        InfoLabel:Set("รอ Stronghold เกิดใหม่...")
+        return
+    end
+
+    local func = sh.Functional
+    local openTime = func:GetAttribute("OpenTime")
+    local level = func:GetAttribute("Level") or 1
+
+    if not openTime then return end
+
+    local timeLeft = openTime - workspace:GetServerTimeNow()
+    local timeStr, statusText
+
+    -- ✅ ใช้ key กันวาร์ปรอบเดิม
+    local teleportKey = tostring(sh:GetDebugId()) .. "|" .. tostring(openTime)
+
+    -- 🔥 AUTO TELEPORT แค่ครั้งเดียวต่อรอบ
+    if timeLeft <= 0 and AutoTeleportEnabled then
+        statusText = "✅ เปิดแล้ว!"
+
+        if LastTeleportKey ~= teleportKey then
+            -- ยังไม่เคยวาร์ปรอบนี้ -> วาร์ปเลย
+            LastTeleportKey = teleportKey
+            timeStr = "🚀 กำลังวาร์ป..."
+
+            task.spawn(function()
+                ManualTeleport()
+            end)
+        else
+            -- วาร์ปไปแล้วรอบนี้
+            timeStr = "✅ วาร์ปแล้ว รอรอบถัดไป"
+        end
+    else
+        statusText = "⏳ รอเปิด"
+        local mins = math.floor(timeLeft / 60)
+        local secs = math.floor(timeLeft % 60)
+        if timeLeft <= 30 then
+            timeStr = string.format("%d", secs)
+        else
+            timeStr = string.format("%d:%02d", mins, secs)
+        end
+    end
+
+    -- อัปเดต UI
+    StatusLabel:Set("Stronghold Lv." .. level .. " | AutoTP: " .. (AutoTeleportEnabled and "✅" or "❌"))
+    InfoLabel:Set(string.format("ระดับ: %d\n%s\nเหลือ: %s", level, statusText, timeStr))
+    InfoLabel.TextColor3 = LevelColors[level] or Color3.fromRGB(255, 0, 0)
+end
+
+-- ลูปหลัก
+game:GetService("RunService").Heartbeat:Connect(function()
+    pcall(UpdateStronghold)
+end)
+
+UpdateStronghold()
+
+Rayfield:Notify({
+    Title = "🔥 Stronghold Auto TP พร้อม!",
+    Content = "เจอ SH แล้วกด '🧪 ทดสอบวาร์ป' ทดสอบก่อนได้",
+    Duration = 6
+})
+
+-- แค่ Tab เดียว | ไม่โหลด Rayfield ใหม่ | 57 ชิ้นล่าสุด
+
+local Tab = Window:CreateTab("ดึงของ")
+
+local cloneref = cloneref or function(x) return x end
+local Players = cloneref(game:GetService("Players"))
+local Workspace = cloneref(game:GetService("Workspace"))
+local ReplicatedStorage = cloneref(game:GetService("ReplicatedStorage"))
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local hrp = character:WaitForChild("HumanoidRootPart")
+
+local remoteEvents = ReplicatedStorage:WaitForChild("RemoteEvents")
+local startDragging = remoteEvents:WaitForChild("RequestStartDraggingItem")
+local stopDragging = remoteEvents:WaitForChild("StopDraggingItem")
+
+local offsetDistance = 3
+local dragDelay = 0.03
+
+-- รายชื่อ 57 ชิ้นล่าสุด (เรียง A→Z)
+local itemList = {
+ "Air Rifle","Alpha Wolf Pelt","Anvil Back","Anvil Base","Anvil Front","Apple","Bandage","Basketball","Bear Corpse","Bear Pelt","Berry","Bolt","Broken Fan","Broken Microwave","Bunny Foot","Cake","Carnival Basketball","Carnival Ring","Carrot","Chair","Coal","Coin Stack","Cooked Morsel","Crossbow Cultist","Cultist","Cultist Gem","Cultist Prototype","Defense Blueprint","Fuel Canister","Gem of the Forest Fragment","Giant Sack","Good Axe","Halloween Chest1","Infernal Sack","Iron Body","Item Chest","Item Chest2","Item Chest3","Item Chest4","Item Chest5","Item Chest6","Leather Body","Log","MedKit","Morsel","Oil Barrel","Old Car Engine","Old Flashlight","Old Radio","Old Rod","Old Taming Flute","Potion","Purple Fur Tuft","Revolver","Revolver Ammo","Rifle","Rifle Ammo","Scorpion Shell","Seed Box","Sheet Metal","Steak","Strong Axe","Strong Flashlight","Stronghold Diamond Chest","Tactical Shotgun","Thorn Body","Tyre","Volcanic Chest1","Volcanic Chest2","Washing Machine","Wolf Corpse"
+ }
+
+local function dragItem(item)
+    if not (item and item.Parent) then return false end
+    local clone = cloneref(item)
+    startDragging:FireServer(clone)
+    task.wait(0.03)
+    local pos = (hrp.CFrame * CFrame.new(0, 0, -offsetDistance)).Position
+    task.spawn(function()
+        if clone:IsA("BasePart") then clone.CFrame = CFrame.new(pos)
+        elseif clone:IsA("Model") and clone.PrimaryPart then clone:SetPrimaryPartCFrame(CFrame.new(pos)) end
+    end)
+    task.wait(0.05)
+    stopDragging:FireServer(clone)
+    task.wait(dragDelay)
+    return true
+end
+
+local function getItems(name, max)
+    local t = {}
+    for _, v in ipairs(Workspace.Items:GetChildren()) do
+        if v.Name == name then
+            table.insert(t, v)
+            if #t >= max then break end
+        end
+    end
+    return t
+end
+
+-- Slider จำนวน
+local amount = 10
+Tab:CreateSlider({
+    Name = "จำนวนต่อชนิด",
+    Range = {1, 500},
+    Increment = 1,
+    CurrentValue = 10,
+    Callback = function(v) amount = v end
+})
+
+-- ปุ่มไอเทมทั้ง 57 ชิ้น (เรียง 4 คอลัมน์)
+for i = 1, #itemList, 4 do
+    for j = i, math.min(i+3, #itemList) do
+        local name = itemList[j]
+        Tab:CreateButton({
+            Name = name,
+            Callback = function()
+                local found = getItems(name, amount)
+                if #found == 0 then
+                    Rayfield:Notify({Title="ไม่พบ", Content=name.." ไม่มีในแมพ", Duration=3})
+                    return
+                end
+                local c = 0
+                for _, it in found do
+                    if dragItem(it) then c += 1 end
+                end
+                Rayfield:Notify({Title="สำเร็จ", Content="ดึง "..name.." x"..c, Duration=3})
+            end
+        })
+    end
+end
+
+-- อัปเดต HRP
+player.CharacterAdded:Connect(function(c)
+    character = c
+    hrp = c:WaitForChild("HumanoidRootPart")
+end)
+
+Rayfield:Notify({Title="โหลด Tab สำเร็จ", Content="57 ชิ้นล่าสุด พร้อมใช้!", Duration=5})
+
+-- === แท็บใหม่: ฟังก์ชันเสริม ===
+local miscTab = Window:CreateTab("ฟังก์ชันเสริม")
+
+-- 2) Anti Idle / Anti AFK (กันเตะออกเมื่อยืนนิ่งนาน)
+local antiIdleEnabled = false
+local antiIdleConnection
+
+local function startAntiIdle()
+    if antiIdleEnabled then return end
+    antiIdleEnabled = true
+    
+    antiIdleConnection = game:GetService("RunService").Heartbeat:Connect(function()
+        if antiIdleEnabled then
+            -- ส่งสัญญาณว่าเรายัง active อยู่ (วิธีที่ Roblox ใช้ตรวจ AFK)
+            pcall(function()
+                game:GetService("VirtualUser"):CaptureController()
+                game:GetService("VirtualUser"):ClickButton2(Vector2.new())
+            end)
+        end
+    end)
+end
+
+local function stopAntiIdle()
+    antiIdleEnabled = false
+    if antiIdleConnection then
+        antiIdleConnection:Disconnect()
+        antiIdleConnection = nil
+    end
+end
+
+miscTab:CreateToggle({
+    Name = "⏰ Anti Idle / Anti AFK",
+    CurrentValue = false,
+    Callback = function(val)
+        if val then
+            startAntiIdle()
+            Rayfield:Notify({Title = "เปิด Anti-AFK", Content = "ไม่เตะออกแน่นอน ⏰", Duration = 4})
+        else
+            stopAntiIdle()
+            Rayfield:Notify({Title = "ปิด Anti-AFK", Content = "ระวังโดนเตะนะ", Duration = 3})
+        end
+    end
+})
+
+
+local instantInteractEnabled = false
+local originalHoldDurations = {}
+local connections = {}
+
+local function setPrompt(prompt, enabled)
+    if not prompt or not prompt.Parent then return end
+    
+    if enabled then
+        if originalHoldDurations[prompt] == nil then
+            originalHoldDurations[prompt] = prompt.HoldDuration
+        end
+        prompt.HoldDuration = 0
+        prompt.MaxActivationDistance = 50   -- ปรับระยะได้ตามใจ
+        prompt.RequiresLineOfSight = false  -- ไม่ต้องมองเห็นก็กดได้ (โหดสุด)
+    else
+        if originalHoldDurations[prompt] ~= nil then
+            prompt.HoldDuration = originalHoldDurations[prompt]
+            prompt.MaxActivationDistance = 10
+            prompt.RequiresLineOfSight = true
+        end
+    end
+end
+
+local function enableInstant()
+    if connections.enabled then return end
+    
+    -- 1. แก้ไข Prompt ที่มีอยู่แล้วทั้งหมดทันที
+    for _, prompt in ipairs(workspace:GetDescendants()) do
+        if prompt:IsA("ProximityPrompt") then
+            setPrompt(prompt, true)
+        end
+    end
+
+    -- 2. ตรวจจับ Prompt ใหม่ที่เกิดขึ้นในอนาคต (สำคัญมาก!)
+    connections.added = workspace.DescendantAdded:Connect(function(obj)
+        if obj:IsA("ProximityPrompt") and instantInteractEnabled then
+            task.wait() -- รอให้มันสร้างเสร็จก่อน
+            setPrompt(obj, true)
+        end
+    end)
+    
+    connections.enabled = true
+end
+
+local function disableInstant()
+    if not connections.enabled then return end
+    
+    for prompt, _ in pairs(originalHoldDurations) do
+        if prompt and prompt.Parent then
+            setPrompt(prompt, false)
+        end
+    end
+    
+    originalHoldDurations = {}
+    
+    if connections.added then
+        connections.added:Disconnect()
+        connections.added = nil
+    end
+    
+    connections.enabled = false
+end
+
+-- Toggle หลัก
+miscTab:CreateToggle({
+    Name = "Instant Interact (ลื่นสุด ไม่กระตุก)",
+    CurrentValue = false,
+    Callback = function(state)
+        instantInteractEnabled = state
+        if state then
+            enableInstant()
+        else
+            disableInstant()
+        end
+    end,
+})
+
 
 -- === แท็บสคริปต์เพิ่มเติม ===
 local extraTab = Window:CreateTab("Script ค่ายอื่นๆ")
 extraTab:CreateButton({Name = "Script SomTank", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/MQPS7/99-Night-in-the-Forset/refs/heads/main/99v5"))() end})
 extraTab:CreateButton({Name = "Script Foxname Hub", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/caomod2077/Script/refs/heads/main/FoxnameHub.lua"))() end})
-
--- === แท็บอัพเดต ===
-local updateTab = Window:CreateTab("รายการอัพเดต")
-updateTab:CreateLabel("v1.6 - ลากศพไม่ต้องเลือกชื่อ")
-updateTab:CreateLabel("v1.5 - เพิ่ม ลบหมอกถาวร + ลากศพเฉพาะชื่อ")
-updateTab:CreateLabel("v1.4 - แก้บั๊ก Respawn, Noclip, Fly")
-updateTab:CreateLabel("v1.3.6 - แก้บั๊กเต็มรูปแบบ")
+extraTab:CreateButton({Name = "Infinity Yild", Callback = function() loadstring(game:HttpGet("https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source"))() end})
 
 -- === เครดิต ===
 local creditTab2 = Window:CreateTab("เครดิต")
@@ -369,5 +1463,162 @@ player.CharacterAdded:Connect(function(c)
     infJumpEnabled = false
     Rayfield:LoadConfiguration()
 end)
+
+-- === หลอด HP ต้นไม้แบบเรียบ (ไม่มีตัวเลข) ===
+local TreeHPToggle = false
+local TreeHPConnections = {}
+local TreeHPGuis = {}
+
+local function CreateTreeHPBar(tree)
+    if not tree or TreeHPGuis[tree] then return end
+    
+    local trunk = tree:FindFirstChild("Trunk")
+    if not trunk then return end
+    
+    local bill = Instance.new("BillboardGui")
+    bill.Name = "TreeHPBar"
+    bill.Adornee = trunk
+    bill.Size = UDim2.new(3, 0, 0.6, 0)  -- เล็กกว่าก่อน
+    bill.StudsOffset = Vector3.new(0, 4, 0)
+    bill.AlwaysOnTop = true
+    bill.LightInfluence = 0
+    bill.Parent = trunk
+    
+    local frame = Instance.new("Frame", bill)
+    frame.Size = UDim2.new(1, 0, 1, 0)
+    frame.BackgroundTransparency = 0.3
+    frame.BackgroundColor3 = Color3.new(0, 0, 0)
+    frame.BorderSizePixel = 0
+    frame.ClipsDescendants = true
+    
+    local corner1 = Instance.new("UICorner", frame)
+    corner1.CornerRadius = UDim.new(0, 6)
+    
+    local fill = Instance.new("Frame", frame)
+    fill.Name = "Fill"
+    fill.Size = UDim2.new(1, 0, 1, 0)
+    fill.Position = UDim2.new(0, 0, 0, 0)
+    fill.BackgroundColor3 = Color3.fromRGB(0, 255, 100)  -- เขียวเต็ม
+    fill.BorderSizePixel = 0
+    
+    local corner2 = Instance.new("UICorner", fill)
+    corner2.CornerRadius = UDim.new(0, 4)
+    
+    TreeHPGuis[tree] = {Billboard = bill, Fill = fill, Frame = frame}
+end
+
+local function UpdateTreeHPBar(tree)
+    local guiData = TreeHPGuis[tree]
+    if not guiData then return end
+    
+    local currentHP = tree:GetAttribute("Health") or 0
+    local maxHP = tree:GetAttribute("MaxHealth") or 100
+    local percent = math.clamp(currentHP / maxHP, 0, 1)
+    
+    -- ลดหลอดเรียลไทม์ + เปลี่ยนสี
+    guiData.Fill.Size = UDim2.new(percent, 0, 1, 0)
+    guiData.Fill:TweenSize(UDim2.new(percent, 0, 1, 0), "Out", "Quad", 0.1, true)
+    
+    -- สีหลอดตาม HP (เขียว → เหลือง → ส้ม → แดง)
+    if percent > 0.7 then
+        guiData.Fill.BackgroundColor3 = Color3.fromRGB(0, 255, 100)
+    elseif percent > 0.4 then
+        guiData.Fill.BackgroundColor3 = Color3.fromRGB(255, 255, 0)
+    elseif percent > 0.2 then
+        guiData.Fill.BackgroundColor3 = Color3.fromRGB(255, 165, 0)
+    else
+        guiData.Fill.BackgroundColor3 = Color3.fromRGB(255, 50, 50)
+    end
+end
+
+local function EnableTreeHP()
+    if TreeHPToggle then return end
+    TreeHPToggle = true
+    
+    -- สร้างหลอดให้ต้นไม้ทั้งหมดที่มีอยู่
+    for _, obj in ipairs(workspace:GetDescendants()) do
+        if obj:IsA("Model") and 
+           (obj:FindFirstChild("TreeClass") or 
+            obj.Name:find("Tree") or 
+            obj.Name == "Small Tree" or 
+            obj.Name == "Big Tree") and 
+           obj:FindFirstChild("Trunk") then
+            CreateTreeHPBar(obj)
+        end
+    end
+    
+    -- ติดตามต้นไม้ใหม่
+    TreeHPConnections.Added = workspace.DescendantAdded:Connect(function(obj)
+        if not TreeHPToggle then return end
+        task.wait(0.2)
+        if obj:IsA("Model") and 
+           (obj:FindFirstChild("TreeClass") or obj.Name:find("Tree")) and 
+           obj:FindFirstChild("Trunk") then
+            CreateTreeHPBar(obj)
+        end
+    end)
+    
+    -- อัปเดต HP เรียลไทม์ (ลดตอนตี)
+    TreeHPConnections.Update = game:GetService("RunService").Heartbeat:Connect(function()
+        if not TreeHPToggle then return end
+        for tree, _ in pairs(TreeHPGuis) do
+            if tree and tree.Parent and tree:FindFirstChild("Trunk") then
+                UpdateTreeHPBar(tree)
+            else
+                -- ลบหลอดถ้าต้นไม้หาย
+                if TreeHPGuis[tree] then
+                    TreeHPGuis[tree].Billboard:Destroy()
+                    TreeHPGuis[tree] = nil
+                end
+            end
+        end
+    end)
+    
+    Rayfield:Notify({
+        Title = "🌳 เปิดหลอด HP ต้นไม้!", 
+        Content = "หลอดลดเรียลไทม์ตอนตี (ไม่มีตัวเลข)", 
+        Duration = 3,
+        Image = 6026568198
+    })
+end
+
+local function DisableTreeHP()
+    if not TreeHPToggle then return end
+    TreeHPToggle = false
+    
+    -- ลบหลอดทั้งหมด
+    for _, data in pairs(TreeHPGuis) do
+        if data.Billboard then 
+            data.Billboard:Destroy() 
+        end
+    end
+    TreeHPGuis = {}
+    
+    -- ตัด Connection
+    for _, conn in pairs(TreeHPConnections) do
+        if conn then conn:Disconnect() end
+    end
+    TreeHPConnections = {}
+    
+    Rayfield:Notify({
+        Title = "🌳 ปิดหลอด HP ต้นไม้", 
+        Content = "หลอดหายหมดแล้ว", 
+        Duration = 2
+    })
+end
+
+-- 🔥 เพิ่ม Toggle ในแท็บ "ตัดไม้" (ChopTab)
+ChopTab:CreateToggle({
+    Name = "🌳 หลอด HP ต้นไม้ (เรียบ - ลดตอนตี)",
+    CurrentValue = false,
+    Flag = "TreeHPBar",
+    Callback = function(val)
+        if val then
+            EnableTreeHP()
+        else
+            DisableTreeHP()
+        end
+    end
+})
 
 Rayfield:Notify({Title="โหลดสำเร็จ!", Content="พร้อมลุย ไลฟ์สาระ ไปวันๆ!", Duration=4, Image=6026568198})
