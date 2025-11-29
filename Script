@@ -95,7 +95,8 @@ local godmodeToggled = false
 MainTab:CreateButton({Name = "อมตะ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/godmode"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "Godmode Active",Duration = 3})end})
 MainTab:CreateButton({Name = "หนีกลับบ้าน",Callback = function()local char = player.Character or player.CharacterAdded:Wait()local hrp = char:WaitForChild("HumanoidRootPart")hrp.CFrame = CFrame.new(12.079488, 0, 3.2662038, 0, 0, 1, 0, 1, 0, -1, 0, 0)Rayfield:Notify({Title="วาปด่วน!", Content="ถึงแล้ว", Duration=2, Image=13014647359})end})
 MainTab:CreateButton({Name = "เติมไฟ",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getfire"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมไฟเรียบร้อย",Duration = 3})end})
-MainTab:CreateButton({Name = "เติมยา",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมอาหารเรียบร้อย",Duration = 3})end})
+MainTab:CreateButton({Name = "เติมอาหาร",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/food"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมอาหารเรียบร้อย",Duration = 3})end})
+MainTab:CreateButton({Name = "เติมยา",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getbandage"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เติมยา",Duration = 3})end})
 MainTab:CreateButton({Name = "เติมเครื่องบด",Callback = function()loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/getiron"))()game:GetService("StarterGui"):SetCore("SendNotification", {Title = "สำเร็จ!",Text = "เครื่องบด",Duration = 3})end})
 local flyToggle = MainTab:CreateToggle({Name="เปิด/ปิด การบิน", CurrentValue=false, Flag="FlyToggle", Callback=function(val) if val then startFlying() else stopFlying() end end})
 MainTab:CreateButton({
@@ -131,6 +132,7 @@ MainTab:CreateButton({
         })
     end
 })
+
 
 -- ปุ่มอมตะแบบ Keybind (กด Numpad1 เพื่อเปิด Godmode)
 MainTab:CreateKeybind({
@@ -181,6 +183,24 @@ MainTab:CreateKeybind({
         Rayfield:Notify({
             Title = "สำเร็จ!",
             Content = "เติมไฟแล้ว",
+            Duration = 4,
+            Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
+        })
+    end
+})
+
+MainTab:CreateKeybind({
+    Name = "เติมอาหาร",
+    CurrentKeybind = "KeypadZero",  -- หรือ "Numpad1" ก็ได้
+    HoldToInteract = false,        -- กดครั้งเดียวทำงาน
+    Callback = function()
+        -- โหลดและรันสคริปต์ Godmode
+        loadstring(game:HttpGet("https://raw.githubusercontent.com/livezalaeveryday/99-Night-Forest/refs/heads/main/food"))()
+        
+        -- หรือถ้าใช้ Rayfield Notify (สวยกว่า)
+        Rayfield:Notify({
+            Title = "อาหาร",
+            Content = "ดึงอาหาร แล้ว",
             Duration = 4,
             Image = 13014647359  -- ไอคอน Roblox (ถ้ามี)
         })
